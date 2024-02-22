@@ -2,6 +2,7 @@ import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from db import DataBase
 from utils import CastDB
+from model.result import Result
 
 class PostgreSQL(DataBase):
 
@@ -213,12 +214,20 @@ class PostgreSQL(DataBase):
         except Exception as e:
             raise e
     
-    def search_tables(self, filter:str):
+    def search_tables(self, filter:str) -> Result:
+        result = Result(headers=['tables'])
+        
         tables = self._select(f"Select table_name from information_schema.tables where table_name ilike '%{filter}%' and table_type='BASE TABLE'")
-        return tables
+        for table in tables:
+            result.rows.append(table)
+
+        return result
     
-    def search_columns(self, filter:str):
-        columns = self._select(f"Select table_name,column_name from information_schema.columns where column_name ilike '%{filter}%' and table_schema!='pg_catalog'")
-        return columns
+    def search_columns(self, filter:str) -> Result:
+        result = Result(headers=['table_name','column_name'])
+        columns = self._select(f"Select table_name,column_name from information_schema.columns where column_name ilike '%{filter}%' and table_schema!='pg_catalog'", showColumns=True)
+        for col in columns:
+            result.rows.append([col["table_name"], col["column_name"]])
+        return result
     
     #def search_values(self, )

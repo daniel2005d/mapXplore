@@ -37,4 +37,18 @@ class Color:
     @staticmethod
     def print(message):
         print(Color.format(message))
+    
+    def format_string(text:str, match_word:str)->str:
+        text = str(text)
+        formatted = False
+        matches = re.search(match_word, text, flags=re.IGNORECASE)
+        hight_light = text
+        if matches:
+            formatted = True
+            start = matches.start()
+            end = matches.end()
+            hight_light = Color.format(f"{text[:start]}[red]{text[start:end]}[reset]{text[end:]}")
+        
+        return hight_light, formatted
+
         

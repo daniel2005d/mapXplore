@@ -2,14 +2,17 @@ from database.connection import Connection
 from utils import Util
 import cmd2
 import re
-from colors import Color
-from cmd2 import Cmd2ArgumentParser, with_argparser
+from stdout.colors import Color
+from cmd2 import Cmd2ArgumentParser
 from dbConnector import DbConnector
-
+from model.result import Result
+from stdout.ansiprint import AnsiPrint
 
 class SearchConsole(cmd2.Cmd):
     def __init__(self) -> None:
-        super().__init__()
+        super().__init__(allow_cli_args=False)
+        self.prompt = 'mapXplore>'
+        self.debug=True
         self._objects = {}
         self._config = {
             "operator":"or",
@@ -36,6 +39,8 @@ class SearchConsole(cmd2.Cmd):
     
     
     def print_information(self):
+        
+
         print(Color.format(f"=== [bold]Configuration[reset] ===="))
         for config in self._config:
             print(Color.format(f"[cyan]{config}: [green]{self._config[config]}[reset]"))
@@ -46,10 +51,11 @@ class SearchConsole(cmd2.Cmd):
         for index, argv in enumerate(arguments):
             if index == 0:
                 option = argv
-            if index == 1:
-                value = argv
+            else:
+                value = '' if value is None else value
+                value+= " " + argv
 
-        return option, value
+        return option, value.lstrip() if value is not None else None
     
     def _print_objects(self, option:str):
         if option in self._objects:
@@ -57,30 +63,33 @@ class SearchConsole(cmd2.Cmd):
             print(value)
         else:
             Util.print_important(f"It don't have {option}")
+        
     
     def _filter_by_value(self, value_to_find):
         queries = self._cursor.create_query_to_all_values(value_to_find, self._config["operator"])
         for qry in queries:
-            results = self.run_query(qry["sentence"])
-            tablename = qry["tablename"]
-            
-            if results:
-                print(Color.format(f"Table [white][bold]{tablename}[reset]"))
-                for row in results:
-                    for column in row:
-                        row_value = str(row[column])
-                        matches = re.search(value_to_find, row_value, flags=re.IGNORECASE)
-                        if matches:
-                            start = matches.start()
-                            end = matches.end()
-                            hight_light = Color.format(f"[blue][bold]{column}[reset]=>{row_value[:start]}[red]{row_value[start:end]}[reset]{row_value[end:]}")
-                            print(hight_light)
-                   
-                        
+            table_name = qry["tablename"]
+            results = self.run_query(qry["sentence"], value_to_find)
+            if results.length > 0:
+                AnsiPrint.printResult(results)
 
-    def run_query(self, sentence):
+
+    def run_query(self, sentence, value_to_hight_light):
         result = self._cursor.execute_query(sentence)
-        return result
+        information = Result()
+        if result is not None:
+            
+            for col in result[0].keys():
+                information.headers.append(col)
+
+            for row in result:
+                columns = []
+                for key in row:
+                    column_text, formatted = Color.format_string(row[key], value_to_hight_light)
+                    columns.append(column_text)
+                information.rows.append(columns)
+
+        return information
 
     def _run_completions(self, options, text):
         completions=[]
@@ -133,26 +142,22 @@ class SearchConsole(cmd2.Cmd):
         for opt in options:
             if opt == 'tables':
                 tables = self._cursor.search_tables(value)
-                self._objects["tables"]=tables
+                AnsiPrint.printResult(tables)
+            
             if opt == 'columns':
                 columns = self._cursor.search_columns(value)
-                self._objects["columns"]=columns
+                AnsiPrint.printResult(columns)
             if opt == 'values':
-                self._filter_by_value(value)
-                
-            self._print_objects(opt)
-
-
+                values = self._filter_by_value(value)
+            
 def main():
     parser = Cmd2ArgumentParser()
-    # parser = argparse.ArgumentParser()
     parser.add_argument('-s','--host', required=False, help='Postgress server IP/Name')
     parser.add_argument('-u', '--username', required=False, help='Username of the database server')
     parser.add_argument('-p', '--password', required=False, help='Username of the database server')
     parser.add_argument('-D', '--database', required=True, help='Specific database to search')
     parser.add_argument('--dbtype', choices=['postgres','mongo'],default='postgress')
-    # parser.add_argument('value',  help='Value to filter')
-    #args = parser.parse_args()
+    
     args= parser.parse_args()
 
     search = SearchConsole()

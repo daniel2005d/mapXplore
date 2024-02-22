@@ -31,7 +31,7 @@ class ReadContent():
           return directories,dumpdir
 
     def _createDBEngine(self, database=None, connection=None):
-        if self._dbtype == 'postgress':
+        if self._dbtype == 'postgres':
             return PostgreSQL(self._DEFAULT_DB if database is None else database, self._connection if connection is None else connection)
         elif self._dbtype == 'mongo':
             return MongoDB(self._DEFAULT_DB if database is None else database, self._connection if connection is None else connection)
@@ -51,13 +51,15 @@ class ReadContent():
             directories.append(self._database)
 
         if directories is not None:
-            db = self._createDBEngine(self._DEFAULT_DB, self._connection) #DataBase(self._DEFAULT_DB, self._connection)
-            db.recreate = self._recreate
-            
-            for dir in directories:
-                Util.print(f"Creating database {dir.lower()}", color="cyan")
-                db.create_database(dir)
-                self.create_tables(dir, os.path.join(dumpdir, dir))
+            db = self._createDBEngine(self._DEFAULT_DB, self._connection)
+            if db is not None:
+                db.recreate = self._recreate
+                for dir in directories:
+                    Util.print(f"Creating database {dir.lower()}", color="cyan")
+                    db.create_database(dir)
+                    self.create_tables(dir, os.path.join(dumpdir, dir))
+            else:
+                Util.print_error("Cannot connect to server")
         else:
             Util.print_error(f'The {dumpdir} directory does not exists.')
             sys.exit(-1)
@@ -167,7 +169,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--table', required=False, help='Specific table to import')
     parser.add_argument('-D', '--database', required=False, help='Specific database to import')
     parser.add_argument('-f', '--force', required=False, help='Recreate all databases', action="store_true")
-    parser.add_argument('--dbtype',choices=['postgress','mongo'],default='postgress')
+    parser.add_argument('--dbtype',choices=['postgres','mongo'],default='postgress')
     parser.add_argument('--config', help='Config json file. With parameters options')
     args = parser.parse_args()
 
