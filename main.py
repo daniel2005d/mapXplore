@@ -7,7 +7,7 @@ import sys
 from database.connection import Connection
 from database.PostgreSQL import PostgreSQL
 from database.MongoDB import MongoDB
-from utils import Util, Hashing
+from utils.utils import Util, Hashing
 import argparse
 import re
 import threading

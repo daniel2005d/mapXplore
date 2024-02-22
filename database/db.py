@@ -1,5 +1,5 @@
 from connection import Connection
-from utils import Hashing
+from utils.utils import Hashing
 
 class DataBase:
     def __init__(self, dbname:str, connectionsettings:Connection):

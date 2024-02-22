@@ -38,7 +38,7 @@ class Color:
     def print(message):
         print(Color.format(message))
     
-    def format_string(text:str, match_word:str)->str:
+    def highlight_text(text:str, match_word:str, color:str='red')->str:
         text = str(text)
         formatted = False
         matches = re.search(match_word, text, flags=re.IGNORECASE)
@@ -47,7 +47,7 @@ class Color:
             formatted = True
             start = matches.start()
             end = matches.end()
-            hight_light = Color.format(f"{text[:start]}[red]{text[start:end]}[reset]{text[end:]}")
+            hight_light = Color.format(f"{text[:start]}[{color}]{text[start:end]}[reset]{text[end:]}")
         
         return hight_light, formatted
 

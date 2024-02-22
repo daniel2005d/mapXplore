@@ -1,8 +1,9 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from db import DataBase
-from utils import CastDB
+from utils.utils import CastDB
 from model.result import Result
+from config.settings import Settings
 
 class PostgreSQL(DataBase):
 
@@ -77,10 +78,21 @@ class PostgreSQL(DataBase):
                 self._tables.append({"table":tablename, "columns":columns})
         
         return columns
+    
+    def _get_sentence(self, filter:str,operator:str='ilike', logic_operator:str='or')->str:
+        sentence = ""
+        for index, word in enumerate(filter.split(',')):
+            if index == 0:
+                sentence+=f"'%{word}%' "
+            else:
+                sentence+= logic_operator+" {object_name} "+operator+f" '%{word}'"  #f"{logic_operator} table_name {operator} '%{word}%'"
+        
+        return sentence
+    
     def execute_query(self, query:str):
         return self._select(query, showColumns=True)
     
-    def create_query_to_all_values(self, value_to_find, operator='or'):
+    def create_query_to_all_values(self, filter:str,operator:str='ilike', logic_operator:str='or'):
         rows = self.get_tables_and_columns()
         queries = []
         for row in rows:
@@ -91,10 +103,12 @@ class PostgreSQL(DataBase):
                 definition = col.split(':')
                 column_name = f'"{definition[0]}"'
                 data_type = definition[1]
-                if index == 0:
-                    sentence+=f"{CastDB.cast_column(column_name, data_type)} ilike '%{value_to_find}%' "
-                else:
-                    sentence+=f"{operator} {CastDB.cast_column(column_name, data_type)} ilike '%{value_to_find}%' "
+                if data_type not in Settings.exclude_data_type:
+                    #sentence = self._get_sentence(filter, operator, logic_operator).format(object_name=CastDB.cast_column(column_name, data_type))
+                    if index == 0:
+                        sentence+=f"{CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
+                    else:
+                        sentence+=f"{operator} {CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
             
             queries.append({"tablename":tablename,"sentence":sentence})
         
@@ -214,20 +228,20 @@ class PostgreSQL(DataBase):
         except Exception as e:
             raise e
     
-    def search_tables(self, filter:str) -> Result:
+
+    def search_tables(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
         result = Result(headers=['tables'])
-        
-        tables = self._select(f"Select table_name from information_schema.tables where table_name ilike '%{filter}%' and table_type='BASE TABLE'")
+        sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
+        tables = self._select(f"Select table_name from information_schema.tables where (table_name ilike {sentence}) and table_schema='public'")
         for table in tables:
             result.rows.append(table)
 
         return result
     
-    def search_columns(self, filter:str) -> Result:
+    def search_columns(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
         result = Result(headers=['table_name','column_name'])
-        columns = self._select(f"Select table_name,column_name from information_schema.columns where column_name ilike '%{filter}%' and table_schema!='pg_catalog'", showColumns=True)
+        sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
+        columns = self._select(f"Select table_name,column_name from information_schema.columns where (column_name ilike {sentence}) and table_schema='public'", showColumns=True)
         for col in columns:
             result.rows.append([col["table_name"], col["column_name"]])
         return result
-    
-    #def search_values(self, )
