@@ -1,6 +1,7 @@
 from model.result import Result
 from utils.colors import Color
 import shutil
+from cmd2 import ansi, EightBitBg, RgbFg
 
 from typing import (
     Any,
@@ -23,7 +24,7 @@ class AnsiPrint:
             columns: List[Column] = list()
             data_list: List[List[Any]] = list()
             for header in result.headers:
-                columns.append(Column(header, width=int(width/len(result.headers))))
+                columns.append(Column(ansi.style(header, bold=True,italic=True, bg=EightBitBg.GRAY_53) , width=int(width/len(result.headers))-5))
             
             for row in result.rows:
                 data_list.append(row)
@@ -42,7 +43,7 @@ class AnsiPrint:
     
     @staticmethod
     def print_error(text:str)->None:
-        AnsiPrint.print(f"[red][!][bold]{text}[reset]")
+        AnsiPrint.print(f"[red][!][bold] {text}[reset]")
 
     
     

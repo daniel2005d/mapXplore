@@ -1,4 +1,5 @@
 from typing import List
+from utils.crypto.hashes import Hashes
 
 class Settings:
     def __init__(self) -> None:
@@ -11,6 +12,7 @@ class Settings:
 
     exclude_data_type: List[str] = ["boolean","timestamp without time zone","date","datetime"]
     filter_options = ['tables','columns','values','all']
+    allow_hashes = Hashes.get_available_algorithms()
     setting = {
         "Query":{
             "operator":"ilike",
