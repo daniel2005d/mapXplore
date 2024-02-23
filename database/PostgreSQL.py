@@ -97,11 +97,13 @@ class PostgreSQL(DataBase):
         queries = []
         for row in rows:
             tablename = row[0]
-            columns = row[1]#.strip('{}').split(',')
-            sentence = f"Select * from {tablename} where "
+            columns = row[1]
+            sentence = ""
+            columns_list = ""
             for index, col in enumerate(columns):
                 definition = col.split(':')
                 column_name = f'"{definition[0]}"'
+                columns_list+=f"{column_name},"
                 data_type = definition[1]
                 if data_type not in Settings.exclude_data_type:
                     #sentence = self._get_sentence(filter, operator, logic_operator).format(object_name=CastDB.cast_column(column_name, data_type))
@@ -109,16 +111,18 @@ class PostgreSQL(DataBase):
                         sentence+=f"{CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
                     else:
                         sentence+=f"{operator} {CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
-            
+            sentence=f"Select {columns_list[:-1]} from {tablename} where {sentence}"
             queries.append({"tablename":tablename,"sentence":sentence})
         
         return queries
         
     
     def get_tables_and_columns(self):
-        sentence = """
+        sentence = f"""
                     Select table_name, array_agg(column_name||':'||data_type) as columns
-                    from information_schema.columns where table_schema='public' group by table_name
+                    from information_schema.columns where table_schema='public' 
+                    and column_name != '{Settings.checksum_column}'
+                    group by table_name
         """
         rows = self._select(sentence)
         return rows
@@ -233,15 +237,17 @@ class PostgreSQL(DataBase):
         result = Result(headers=['tables'])
         sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
         tables = self._select(f"Select table_name from information_schema.tables where (table_name ilike {sentence}) and table_schema='public'")
-        for table in tables:
-            result.rows.append(table)
+        if tables:
+            for table in tables:
+                result.rows.append(table)
 
-        return result
+            return result
     
     def search_columns(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
         result = Result(headers=['table_name','column_name'])
         sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
         columns = self._select(f"Select table_name,column_name from information_schema.columns where (column_name ilike {sentence}) and table_schema='public'", showColumns=True)
-        for col in columns:
-            result.rows.append([col["table_name"], col["column_name"]])
-        return result
+        if columns:
+            for col in columns:
+                result.rows.append([col["table_name"], col["column_name"]])
+            return result

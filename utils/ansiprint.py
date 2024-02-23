@@ -24,10 +24,18 @@ class AnsiPrint:
             columns: List[Column] = list()
             data_list: List[List[Any]] = list()
             for header in result.headers:
-                columns.append(Column(ansi.style(header, bold=True,italic=True, bg=EightBitBg.GRAY_53) , width=int(width/len(result.headers))-5))
+                column_width = int(width/len(result.headers))
+                if column_width > 10:
+                    column_width-= 5
+
+                columns.append(Column(ansi.style(header, bold=True,italic=True, bg=EightBitBg.GRAY_53), width=column_width))
             
-            for row in result.rows:
-                data_list.append(row)
+            if result.formatted_len > 0:
+                for row in result.formatted_rows:
+                    data_list.append(row)
+            else:
+                for row in result.rows:
+                    data_list.append(row)
             
             bt = BorderedTable(columns)
             table = bt.generate_table(data_list)
@@ -43,7 +51,11 @@ class AnsiPrint:
     
     @staticmethod
     def print_error(text:str)->None:
-        AnsiPrint.print(f"[red][!][bold] {text}[reset]")
+        AnsiPrint.print(f"[red][-][bold] {text}[reset]")
+    
+    @staticmethod
+    def print_success(text:str)->None:
+        AnsiPrint.print(f"[green][+][bold] {text}[reset]")
 
     
     

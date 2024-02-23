@@ -42,9 +42,7 @@ class SearchConsole(cmd2.Cmd):
     
     def do_quit(self, arg):
         return True
-    
-    def complete_search(self, text, line, begidx, endidx):
-        return self._run_completions(text)
+
 
 
 def main():

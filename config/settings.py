@@ -9,7 +9,8 @@ class Settings:
         "TypeTitle":"TypeFormat_{col_name}",
         "ContentTitle":"DataFromBase64_{col_name}"
     }
-
+    checksum_column = 'sqlmap_hash'
+    valid_format_files = ['html','csv','json']
     exclude_data_type: List[str] = ["boolean","timestamp without time zone","date","datetime"]
     filter_options = ['tables','columns','values','all']
     allow_hashes = Hashes.get_available_algorithms()
@@ -32,7 +33,8 @@ class Settings:
             "output":"",
             "savefiles":False,
             "format":'csv',
-            "truncate":10
+            "truncate":10,
+            "csvdelimiter":","
         }
 
     }
@@ -41,19 +43,5 @@ class Settings:
     @staticmethod
     def set_value(section, key, value):
         pass
-
-# class DatabaseSettings:
-#     def __init__(self, **kwargs) -> None:
-#         self._settings = {}
-    
-#     @property
-#     def get(self):
-#         return self._settings
-
-#     @set.setter
-#     def set(self, option, value):
-#         self._settings[option]=value
-        
-
 
     

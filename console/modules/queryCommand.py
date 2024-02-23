@@ -4,16 +4,41 @@ from utils.ansiprint import AnsiPrint
 from config.settings import Settings
 from middle.running import Running, QueryType
 from console.modules.argumentsManager import ArgumentsManager
-
+from utils.crypto.hashes import Hashes
+from utils.colors import Color
 
 @with_default_category('Query Category')
 class QueryCommandSet(CommandSet, ArgumentsManager):
     def __init__(self) -> None:
         super().__init__()
         self._filter_options = Settings.filter_options
+        self._result_options = Settings.setting["Results"]
         self._core = Running()
+        self._results = []
+
+    def complete_search(self, text, line, begidx, endidx):
+        completions = []
+        hashes = list(Hashes.get_available_algorithms())
+        for hash in hashes:
+            if hash.startswith(text):
+                completions.append(hash)
+
+        for item in Settings.filter_options:
+            if item.startswith(text):
+                completions.append(item)
+        
+        return completions
+    
+    def do_save(self, arg):
+        format = arg.args if arg.args != '' else self._result_options["format"]
+        if format in Settings.valid_format_files:
+            self._core.export(format)
+        else:
+            AnsiPrint.print_error(f"[bold]{format}[reset] is not valid format")
+
     
     def do_search(self, arg):
+        
         option, value = self._get_arguments(arg, 1)
         hash_type = None
         if option is not None:
@@ -43,4 +68,6 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
                 else:
                     AnsiPrint.print_error(f"Criterial not found {option}")
                 
-                self._core.run(query_option, value, hash_type)
+                results = self._core.run(query_option, value, hash_type)
+                if results:
+                    self._results.append(results)
