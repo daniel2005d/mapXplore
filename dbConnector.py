@@ -21,7 +21,7 @@ class DbConnector:
         self._username = arguments.username
         self._password = arguments.password
         self._connection = Connection(server=arguments.host,username=arguments.username,password=arguments.password)
-        self._dbtype = arguments.dbtype
+        self._dbms = arguments.dbms
         self._DEFAULT_DB = 'postgres'
 
     def _createDBEngine(self, database=None, connection=None):
@@ -30,7 +30,7 @@ class DbConnector:
         elif database is None and self._database is None:
             database = self._DEFAULT_DB
 
-        if self._dbtype == 'postgres':
-            return PostgreSQL(database, self._connection if connection is None else connection)
-        elif self._dbtype == 'mongo':
+        if self._dbms == 'postgres':
+            return PostgreSQL(database.lower(), self._connection if connection is None else connection)
+        elif self._dbms == 'mongo':
             return MongoDB(database, self._connection if connection is None else connection)

@@ -27,7 +27,7 @@ class Running:
     def _create_dbCursor(self):
         db = DbConnector(database=self._dbConfig["database"], host=self._dbConfig["host"], 
                          username=self._dbConfig["username"], password=self._dbConfig["password"], 
-                         dbtype=self._dbConfig["dbtype"])
+                         dbms=self._dbConfig["dbms"])
         self._cursor = db._createDBEngine()
     
     def _filter_by_value(self, value_to_find):

@@ -11,4 +11,4 @@ class Connection:
     delimiter=""
     table=""
     recreate=False
-    dbtype=""
+    dbms=""

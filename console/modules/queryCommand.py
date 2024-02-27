@@ -38,8 +38,16 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
 
     
     def do_search(self, arg):
-        
-        option, value = self._get_arguments(arg, 1)
+        option = None
+        value = None
+        if len(arg.arg_list)>=1:
+            if arg.arg_list[0] not in self._filter_options:
+                option = 'values'
+                value= ' '.join(arg.arg_list)
+                
+            else:
+                option, value = self._get_arguments(arg, 1)
+
         hash_type = None
         if option is not None:
             if option in Settings.allow_hashes:

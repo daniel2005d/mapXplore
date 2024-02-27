@@ -13,6 +13,10 @@ class DataBase:
             self._tables = []
     
     @property
+    def principal_database(self)->str:
+        pass
+    
+    @property
     def recreate(self) -> bool:
         return self._recreate
     
@@ -64,6 +68,10 @@ class DataBase:
     def get_tables_and_columns(self):
         pass
 
+    """
+    Retrieve all tables and columns to try find out
+    information inside this
+    """
     def create_query_to_all_values(self, value_to_find, operator='or'):
         pass
 

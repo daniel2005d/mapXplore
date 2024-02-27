@@ -7,6 +7,10 @@ from config.settings import Settings
 
 class PostgreSQL(DataBase):
 
+    @property
+    def principal_database(self)->str:
+        return "postgres"
+
     def _get_cursor(self):
             self._conn = psycopg2.connect(dbname=self._database, user=self.username, password=self.password, host=self.host)
             self._conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT);
@@ -106,7 +110,6 @@ class PostgreSQL(DataBase):
                 columns_list+=f"{column_name},"
                 data_type = definition[1]
                 if data_type not in Settings.exclude_data_type:
-                    #sentence = self._get_sentence(filter, operator, logic_operator).format(object_name=CastDB.cast_column(column_name, data_type))
                     if index == 0:
                         sentence+=f"{CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
                     else:

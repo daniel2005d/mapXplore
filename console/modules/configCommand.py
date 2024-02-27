@@ -3,6 +3,8 @@ from cmd2 import CommandSet, with_default_category
 from utils.ansiprint import AnsiPrint
 from config.settings import Settings
 from console.modules.argumentsManager import ArgumentsManager
+import os
+
 
 @with_default_category('Config Category')
 class ConfigCommandSet(CommandSet, ArgumentsManager):
@@ -17,9 +19,8 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
         Settings.setting["Database"]["username"]=args.username
         Settings.setting["Database"]["password"]=args.password
         Settings.setting["Database"]["database"]=args.database
-        Settings.setting["Database"]["dbtype"]=args.dbtype
+        Settings.setting["Database"]["dbms"]=args.dbms
 
-    
 
     def complete_set(self, text, line, _, endidx):
         completions = [] 
@@ -46,6 +47,7 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
 
         return completions if len(completions)>0 else tuple(Settings.setting.keys())
         
+    
     def do_get(self, arg:cmd2.Statement):
         option, value = self._get_arguments(arg, 1)
         if option is not None:
@@ -82,4 +84,7 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
             else:
                 AnsiPrint.print_error(f'Argument {option} {value} is not recognized')
                 return False
-            
+    
+    def do_options(self, args):
+        args.arg_list.append('config')
+        self.do_get(args)
