@@ -2,6 +2,7 @@ from model.result import Result
 from utils.colors import Color
 import shutil
 from cmd2 import ansi, EightBitBg, RgbFg
+from config.settings import Settings
 
 from typing import (
     Any,
@@ -17,6 +18,22 @@ from cmd2.table_creator import (
 
 
 class AnsiPrint:
+
+    @staticmethod
+    def printSetting(section:str):
+        option = Settings.setting[section]
+        data_list: List[List[Any]] = list()
+        for key in option:
+            data_list.append([Color.format(f"[blue]{key}[reset]"), option[key]])
+
+        
+        columns: List[Column] = list()
+        columns.append(Column("Key", width=20))
+        columns.append(Column("Value", width=50))
+        st = SimpleTable(columns)
+        table = st.generate_table(data_list)
+        print(table)
+
     @staticmethod
     def printResult(result:Result):
         if result is not None:
@@ -42,8 +59,8 @@ class AnsiPrint:
             print(table)
     
     @staticmethod
-    def print(text:str)->None:
-        print(Color.format(text))
+    def print(text:str, end:str='\r\n')->None:
+        print(Color.format(text), end=end)
 
     @staticmethod
     def print_info(text:str)->None:
@@ -52,6 +69,10 @@ class AnsiPrint:
     @staticmethod
     def print_error(text:str)->None:
         AnsiPrint.print(f"[red][-][bold] {text}[reset]")
+        if Settings.setting["General"]["debug"]:
+            import traceback
+            traceback.print_exc()
+
     
     @staticmethod
     def print_success(text:str)->None:

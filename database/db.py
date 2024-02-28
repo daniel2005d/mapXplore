@@ -12,7 +12,7 @@ class DataBase:
             self._database = dbname
             self._status_handler = None
             self._hashcolumn = Settings.checksum_column
-            self._recreate = True
+            self._recreate = Settings.setting["Database"]["recreate"]
             self._tables = []
     
     @property
@@ -25,7 +25,7 @@ class DataBase:
     
     @recreate.setter
     def recreate(self, value:bool):
-        self._recreate = value
+        Settings.setting["Database"]["recreate"]=value
 
     @property
     def status_handler(self):
@@ -44,41 +44,41 @@ class DataBase:
     Check if Table exists
     """
     def check_exists_table(self, tablename:str) -> bool:
-        raise ModuleNotFoundError("Not implemented")
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     """
     If database exists, drop and create
     """
     def create_database(self, dbname:str):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
     
     def create_table(self, name:str, columns=None):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     def create_columns(self, tablename:str, columns):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
   
     def insert_data(self, tablename, data, columns=None):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     def search_tables(self, filter:str):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     def search_columns(self, filter:str):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     def get_tables_and_columns(self):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     """
     Retrieve all tables and columns to try find out
     information inside this
     """
     def create_query_to_all_values(self, value_to_find, operator='or'):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     def execute_query(self, query:str):
-        pass
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     def test_connection(self):
         pass

@@ -9,10 +9,14 @@ class Settings:
     
     @staticmethod
     def sqlmap_config(args):
-        Settings.setting["sqlmap"]["input"]=args.input if args.input is not None else None
-        Settings.setting["sqlmap"]["csvdelimiter"] = args.delimiter if args.delimiter is not None else ","
-        Settings.setting["sqlmap"]["database"] = args.database
-        Settings.setting["sqlmap"]["recreate"] = args.recreate
+        if args.input is not None:
+            Settings.setting["sqlmap"]["input"]=args.input
+        if args.delimiter is not None:
+            Settings.setting["sqlmap"]["csvdelimiter"] = args.delimiter
+        if args.database is not None:
+            Settings.setting["sqlmap"]["database"] = args.database
+        if args.recreate is not None:
+            Settings.setting["sqlmap"]["recreate"] = args.recreate
 
     special_column_names={
         "TypeTitle":"TypeFormat_{col_name}",
@@ -28,17 +32,20 @@ class Settings:
         "Query":{
             "operator":"ilike",
             "logical_operator":"or"
+            
         },
         "General":{
             "elapsed":True,
-            "includeb64":True
+            "includeb64":True,
+            "debug":True
         },
         "Database":{
             "host":"30.0.1.108",
             "username":"postgres",
             "password":"3A9eQAHluSe7",
             "database":"",
-            "dbms":"postgres"
+            "dbms":"postgres",
+            "recreate":True
         },
         "Results":{
             "output":"",
@@ -48,19 +55,15 @@ class Settings:
             "csvdelimiter":","
         },
         "sqlmap":{
-            "input":"",
+            "input":"/home/kali/.local/share/sqlmap/output/evil.com/",
             "csvdelimiter":",",
-            "database":"",
-            "recreate":False
+            "database":""
+            
             
         }
-
-
     }
 
 
     @staticmethod
     def set_value(section, key, value):
-        pass
-
-    
+        Settings.setting[section][key]=value

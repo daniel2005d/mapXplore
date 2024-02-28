@@ -14,7 +14,12 @@ def get(key):
     global translations
     if translations is None:
         get_text()
-    if key in translations:
-        return translations.get(key)
-    else:
-        return ""
+    
+    content = key.split('.')
+    for index, option in enumerate(content):
+        if option in translations:
+            if index == len(content)-1:
+                return translations.get(option)
+            else:
+                translations = translations.get(option)
+    return ""    

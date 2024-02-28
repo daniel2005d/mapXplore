@@ -25,13 +25,27 @@ class Running:
         self._results = []
         self._export_manager = SaveManager()
         self._output_settings = Settings.setting["Results"]
+        self._cursor = None
         
+    
+    def _validate_arguments(self) -> bool:
+        result = True
+        if self._dbConfig["dbms"] == 'sqlite':
+            if self._dbConfig["database"] is None:
+                result = False
+                AnsiPrint.print_error(locale.get("databasenull"))
+        elif self._dbConfig["dbms"] == 'postgres':
+            if self._dbConfig["database"] is None:
+                result = False
+                AnsiPrint.print_error(locale.get("databasenull"))
+        return result
 
     def _create_dbCursor(self):
-        db = DbConnector(database=self._dbConfig["database"], host=self._dbConfig["host"], 
-                         username=self._dbConfig["username"], password=self._dbConfig["password"], 
-                         dbms=self._dbConfig["dbms"])
-        self._cursor = db._createDBEngine()
+        if self._validate_arguments():
+            db = DbConnector(database=self._dbConfig["database"], host=self._dbConfig["host"], 
+                            username=self._dbConfig["username"], password=self._dbConfig["password"], 
+                            dbms=self._dbConfig["dbms"])
+            self._cursor = db._createDBEngine()
     
     def _get_values_to_find(self, word:str)->str:
         criterial = []
@@ -99,7 +113,7 @@ class Running:
     def run_query(self, sentence, value_to_hight_light):
         result = self._cursor.execute_query(sentence)
         information = Result()
-        if result is not None:
+        if result is not None and len(result)>0:
             
             for col in result[0].keys():
                 information.headers.append(col)
@@ -139,29 +153,29 @@ class Running:
         try:
             results = None
             self._create_dbCursor()
-            if hash_type is not None:
-                value = self._get_hashes(hash_type, value)
+            if self._cursor is not None:
+                if hash_type is not None:
+                    value = self._get_hashes(hash_type, value)
 
-            if option == QueryType.TABLES:
-                results = self._cursor.search_tables(value)
-            elif option == QueryType.COLUMNS:
-                results = self._cursor.search_columns(value)
-            elif option == QueryType.VALUES:
-                results = self._filter_by_value(value)
-            
-            if results is not None and option != QueryType.VALUES:
-                if results.length>0:
-                    self._results.append(results)
-                    AnsiPrint.printResult(results)
-                    AnsiPrint.print(locale.get("summary"))
-                    AnsiPrint.print(locale.get("summary_total").format(length=results.length))
-                else:
-                    AnsiPrint.print(locale.get("notfound").format(word=value))
-                    
+                if option == QueryType.TABLES:
+                    results = self._cursor.search_tables(value)
+                elif option == QueryType.COLUMNS:
+                    results = self._cursor.search_columns(value)
+                elif option == QueryType.VALUES:
+                    results = self._filter_by_value(value)
+                
+                if results is not None and option != QueryType.VALUES:
+                    if results.length>0:
+                        self._results.append(results)
+                        AnsiPrint.printResult(results)
+                        AnsiPrint.print(locale.get("summary"))
+                        AnsiPrint.print(locale.get("summary_total").format(length=results.length))
+                    else:
+                        AnsiPrint.print(locale.get("notfound").format(word=value))
+                        
 
         except Exception as e:
             AnsiPrint.print_error(e)
-        
         return results
     
 
