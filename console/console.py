@@ -6,7 +6,7 @@ from console.modules.configCommand import ConfigCommandSet
 from console.modules.queryCommand import QueryCommandSet
 from console.modules.importCommand import ImportCommand
 from middle.running import Running
-
+import i18n.locale  as locale
 
 
 
@@ -24,7 +24,7 @@ class SearchConsole(cmd2.Cmd):
         self._commands = []
     
 
-    import_parser = Cmd2ArgumentParser()
+    import_parser = Cmd2ArgumentParser(add_help="AYUDDDDD")
     import_parser.add_argument('--input',help="Path of the site extracted from sqlmap (before /dump)")
     import_parser.add_argument('--delimiter', help="sqlmap Output File Delimiter")
     import_parser.add_argument('--database', help="Database to be imported from sqlmap")
@@ -40,11 +40,15 @@ class SearchConsole(cmd2.Cmd):
     def do_quit(self, arg):
         return True
     
+    """
+    Enables importing the results obtained from running sqlmap to a PostgreSQL or MongoDB database, facilitating searches with greater ease
+    """
     def do_back(self, args):
         if len(self._commands) > 0:
             command = self._commands.pop()
             self.unregister_command_set(command["command"])
 
+    
     @with_argparser(import_parser)
     @cmd2.as_subcommand_to('use', 'import', import_parser)
     def do_use(self, arg):
@@ -65,7 +69,7 @@ def main():
     parser.add_argument('-u', '--username', required=False, help='Username of the database server')
     parser.add_argument('-p', '--password', required=False, help='Username of the database server')
     parser.add_argument('-D', '--database', required=False, help='Specific database to search')
-    parser.add_argument('--dbms', choices=['postgres','mongo'],default='mongo')
+    parser.add_argument('--dbms', choices=['postgres','mongo','sqlite'],default='mongo')
     args = parser.parse_args()
     commands = ConfigCommandSet(args)
     QueryCommandSet()

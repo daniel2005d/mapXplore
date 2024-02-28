@@ -2,6 +2,7 @@ from dbConnector import DbConnector
 from utils.ansiprint import AnsiPrint
 from config.settings import Settings
 from utils.utils import Hashing
+import i18n.locale as locale
 import re
 import os
 
@@ -17,14 +18,16 @@ class Import():
         self._recreate = config["recreate"]
         self._delimiter = config["csvdelimiter"]
         self._dbConfig = Settings.setting["Database"]
+        self._db = None
     
-    def _get_connection(self, database:str):
-        connection = DbConnector(database= database if database is not None else self._database, host=self._dbConfig["host"], 
+    def _get_connection(self, database:str=None):
+
+        connection = DbConnector(database=database if database is not None else self._database, host=self._dbConfig["host"], 
                     username=self._dbConfig["username"], password=self._dbConfig["password"], 
                     dbms=self._dbConfig["dbms"])
         
-        db = connection._createDBEngine()
-        return db
+        self._db = connection._createDBEngine()
+        return self._db
         
 
     def _get_directories(self, directory:str):
@@ -32,6 +35,9 @@ class Import():
         if os.path.exists(dump_dir):
             directories = [name for name in os.listdir(dump_dir) if os.path.isdir(os.path.join(dump_dir, name))]
             return directories,dump_dir
+        else:
+            AnsiPrint.print_error(locale.get('dir_not_not').format(directory=dump_dir))
+            return [],None
         
     def _split_string(self, string):
         pattern = f'[^{self._delimiter}\"]+|\"(?:[^\"]*)\"'
@@ -49,6 +55,7 @@ class Import():
     
 
     def start(self):
+        
         self._bind_config()
         directories = []
         
@@ -66,7 +73,7 @@ class Import():
             for dir in directories:
                 AnsiPrint.print(f"Creating database [yellow][bold]{dir.lower()}[reset]")
 
-                db = self._get_connection(db.principal_database)
+                db = self._get_connection() #TODO: !Check how to get principal database name from DB Connector
                 db.create_database(dir)
                 self.create_tables(dir, os.path.join(dump_dir, dir))
         else:
@@ -100,14 +107,17 @@ class Import():
         columns = []
         for index, line in enumerate(lines):
             try:
+                if file_name == "siv_norp" or file_name == "web_audi":
+                    if index == 10:
+                        print("")
+
                 
                 line = line.strip()
                 if line != "":
                     if index > 0:
                         line+=f"{self._delimiter}{Hashing.get_md5(line)}"
                     
-                    if file_name.startswith("reports"):
-                        print("")
+                    
                     fields = self._split_string(line.strip())
                     
                     if index == 0:

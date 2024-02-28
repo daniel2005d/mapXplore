@@ -1,7 +1,7 @@
 from database.connection import Connection
 from database.PostgreSQL import PostgreSQL
 from database.MongoDB import MongoDB
-
+from database.SQliteDB import SQLite
 
 class DbConnector:
     def __init__(self,*argv, **kwargs) -> None:
@@ -22,15 +22,25 @@ class DbConnector:
         self._password = arguments.password
         self._connection = Connection(server=arguments.host,username=arguments.username,password=arguments.password)
         self._dbms = arguments.dbms
-        self._DEFAULT_DB = 'postgres'
+        
 
     def _createDBEngine(self, database=None, connection=None):
-        if database is None and self._database is not None:
-            database = self._database
-        elif database is None and self._database is None:
-            database = self._DEFAULT_DB
+        con = None
+        try:
+            if database is None and self._database is not None:
+                database = self._database
+            
+            if self._dbms == 'postgres':
+                con = PostgreSQL(database.lower() if database is not None else None, self._connection if connection is None else connection)
+            elif self._dbms == 'mongo':
+                con = MongoDB(database, self._connection if connection is None else connection)
+            elif self._dbms == 'sqlite':
+                con = SQLite(database, None)
+            if con:
+                con.test_connection()
 
-        if self._dbms == 'postgres':
-            return PostgreSQL(database.lower(), self._connection if connection is None else connection)
-        elif self._dbms == 'mongo':
-            return MongoDB(database, self._connection if connection is None else connection)
+                
+        except Exception as e:
+            raise e
+        
+        return con

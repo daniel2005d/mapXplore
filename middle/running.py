@@ -8,6 +8,8 @@ from utils.colors import Color
 from utils.savemanager import SaveManager
 from utils.crypto.hashes import Hashes
 from datetime import datetime
+import i18n.locale as locale
+from base64 import b64encode
 
 class QueryType(Enum):
     NONE = 0
@@ -18,6 +20,7 @@ class QueryType(Enum):
 
 class Running:
     def __init__(self) -> None:
+        self._general = Settings.setting["General"]
         self._dbConfig = Settings.setting["Database"]
         self._results = []
         self._export_manager = SaveManager()
@@ -30,23 +33,42 @@ class Running:
                          dbms=self._dbConfig["dbms"])
         self._cursor = db._createDBEngine()
     
+    def _get_values_to_find(self, word:str)->str:
+        criterial = []
+        words = word.split(',')
+        for value in words:
+            criterial.append(value)
+            if self._general["includeb64"]:
+                criterial.append(b64encode(value.encode()).decode())
+        
+        return criterial
+
     def _filter_by_value(self, value_to_find):
         results_list = []
-        queries = self._cursor.create_query_to_all_values(value_to_find, Settings.setting["Query"]["logical_operator"])
-        found = False
-        for qry in queries:
-            table_name = qry["tablename"]
+        queries=[]
 
-            results = self.run_query(qry["sentence"], value_to_find)
+        for value in self._get_values_to_find(value_to_find):
+            queries += self._cursor.create_query_to_all_values(value)
+        
+        found = False
+        total = 0
+        for qry in queries:
+            
+            results = self.run_query(qry.sentence, qry.word)
             if results.length > 0:
-                results.table_name = table_name
+                total+=results.length
+                results.table_name = qry.tablename
                 results_list.append(results)
                 found = True
                 self._results.append(results)
-                AnsiPrint.print(f"Table Name: [bold][chartreuse_1]{table_name}[reset]")
+                AnsiPrint.print(f"Table Name: [bold][chartreuse_1]{qry.tablename}[reset]")
                 AnsiPrint.printResult(results)
+
         if found == False:
-            AnsiPrint.print_info(f"Not results found for [yellow]{value_to_find}[reset]")
+            AnsiPrint.print_info(locale.get("notfound").format(word=qry.word))
+        else:
+            AnsiPrint.print(locale.get("summary"))
+            AnsiPrint.print(locale.get("summary_total").format(length=total))
         
         return results_list
     
@@ -69,7 +91,7 @@ class Running:
         if len(self._results) > 0:
             self._save(format)
         else:
-            AnsiPrint.print_info("No queries have been generated yet")
+            AnsiPrint.print_info(locale.get("cannot_export"))
 
     """
     Run the query and highlight the text that matches.
@@ -88,19 +110,24 @@ class Running:
                 for key in row:
                     column_value = str(row[key])
                     data,format = Util.is_base64(column_value)
-                    column_text, formatted = Color.highlight_text(column_value, value_to_hight_light)
                     columns.append(column_value)
-                    if data is not None:
-                        if len(column_text) > 500:
-                            truncated_text = Color.format(f"{column_text[0:500]}[cyan][{format if format is not None else 'Truncated...'}][reset]")
+                    if data is not None: # Is Base64 
+                        if len(column_value) > 500:
+                            truncated_text = Color.format(f"{column_value[0:500]}[cyan][{format if format is not None else 'Truncated...'}][reset]")
                             formatted_columns.append(truncated_text)
+                        else:
+                            column_formatted, _ =  Color.highlight_text(column_value, value_to_hight_light)
+                            formatted_columns.append(column_formatted)
+                    else:
+                        column_formatted, _ =  Color.highlight_text(column_value, value_to_hight_light)
+                        formatted_columns.append(column_formatted)
 
                     if data is not None and format is not None:
                         if self._output_settings["savefiles"]:
-                            AnsiPrint.print_info(f"Saving file of the [yellow]{key}[end] column")
+                            AnsiPrint.print_info(locale.get("savefiles").format(key=key))
                             self._export_manager.save(data, format)
-                    else:
-                        formatted_columns.append(column_text)
+                    #else:
+                    
 
                 information.formatted_rows.append(formatted_columns)
                 information.rows.append(columns)
@@ -109,21 +136,31 @@ class Running:
 
     
     def run(self, option:QueryType, value, hash_type:str=None) -> Result:
-        results = None
-        self._create_dbCursor()
-        if hash_type is not None:
-            value = self._get_hashes(hash_type, value)
+        try:
+            results = None
+            self._create_dbCursor()
+            if hash_type is not None:
+                value = self._get_hashes(hash_type, value)
 
-        if option == QueryType.TABLES:
-            results = self._cursor.search_tables(value)
-        elif option == QueryType.COLUMNS:
-            results = self._cursor.search_columns(value)
-        elif option == QueryType.VALUES:
-            results = self._filter_by_value(value)
-        
-        if results is not None and option != QueryType.VALUES:
-            self._results.append(results)
-            AnsiPrint.printResult(results)
+            if option == QueryType.TABLES:
+                results = self._cursor.search_tables(value)
+            elif option == QueryType.COLUMNS:
+                results = self._cursor.search_columns(value)
+            elif option == QueryType.VALUES:
+                results = self._filter_by_value(value)
+            
+            if results is not None and option != QueryType.VALUES:
+                if results.length>0:
+                    self._results.append(results)
+                    AnsiPrint.printResult(results)
+                    AnsiPrint.print(locale.get("summary"))
+                    AnsiPrint.print(locale.get("summary_total").format(length=results.length))
+                else:
+                    AnsiPrint.print(locale.get("notfound").format(word=value))
+                    
+
+        except Exception as e:
+            AnsiPrint.print_error(e)
         
         return results
     

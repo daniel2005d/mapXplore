@@ -1,7 +1,11 @@
 from db import DataBase
 from pymongo import MongoClient
 from model.result import Result
+from model.query import Query
 from config.settings import Settings
+from typing import List
+import re
+
 
 class MongoDB(DataBase):
 
@@ -55,13 +59,22 @@ class MongoDB(DataBase):
 
         return result
     def search_columns(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
+        result = Result(headers=['table_name','column_name'])
         db = self._get_cursor()
+        regex = re.compile(re.escape(filter), re.IGNORECASE)
+        for collection_name in db.list_collection_names():
+            rows = db[collection_name].find({})
+            for row in rows:
+                for key in row:
+                    if regex.search(key):
+                        result.rows.append([collection_name, key])
+        
+        return result
 
     def execute_query(self, query:str):
         results = []
         db = self._get_cursor()
         collection = db[query["tablename"]]
-        #columns = {field: field != '_id' and field != Settings.checksum_column for field in collection.find_one().keys()}
         sentence = query["qry"]
         rows = collection.find(sentence)
         for row in rows:
@@ -69,19 +82,22 @@ class MongoDB(DataBase):
         
         return results if len(results)>0 else None
 
-    def create_query_to_all_values(self, value_to_find, operator='$regex'):
+    def create_query_to_all_values(self, value_to_find, operator='$or') -> List[Query]:
         db = self._get_cursor()
-        queries = []
+        queries:List[Query] = []
         
         for collection_name in db.list_collection_names():
-            query ={operator: [
-                {key: {"$regex": value_to_find, "$options": "i"}} 
-                for key in db[collection_name].find_one().keys()
-                if key != '_id' and key != Settings.checksum_column
-                ]}
-            queries.append({"tablename":collection_name, "sentence": {"tablename":collection_name, "qry":query}})
+            collection_data = db[collection_name].find_one()
+            if collection_data:
 
-        
+                query ={operator: [
+                    {key: {"$regex": value_to_find, "$options": "i"}} 
+                    for key in db[collection_name].find_one().keys()
+                    if key != '_id' and key != Settings.checksum_column
+                    ]}
+            
+                queries.append(Query(word=value_to_find, sentence={"tablename":collection_name, "qry":query}, tablename=collection_name))
+
         return queries
         
 

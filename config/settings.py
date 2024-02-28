@@ -30,7 +30,8 @@ class Settings:
             "logical_operator":"or"
         },
         "General":{
-            "elapsed":True
+            "elapsed":True,
+            "includeb64":True
         },
         "Database":{
             "host":"30.0.1.108",

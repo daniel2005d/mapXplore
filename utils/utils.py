@@ -2,13 +2,20 @@ from colored import Style, fore, back
 import hashlib
 import re
 from base64 import b64decode
+import magic
+import mimetypes
 
 class Util:
     @staticmethod
     def is_base64(text)->tuple[bytes,str]:
+        if text.startswith('data:'):
+            fragments = text.split(';')
+            if len(fragments)>1:
+                return Util.try_convert_b64(fragments[1].split(',',1)[1])
+        
         if len(text) % 4 != 0:
             return None,None
-    
+        
         # Check if all characters are valid
         if not re.match(r'^[A-Za-z0-9+/]*={0,2}$', text):
             return None,None
@@ -29,32 +36,16 @@ class Util:
     @staticmethod
     def try_convert_b64(text)->tuple[bytes,str]:
         b64bytes = b64decode(text)
-        data_format = Util.get_data_type(b64bytes)
+        data_format = Util.get_data_type(text)
         return b64bytes,data_format
     
     @staticmethod
-    def get_data_type(byte_content)->str:
-        
-        magic_numbers = {
-            b'\xFF\xD8\xFF': 'JPEG',
-            b'\x89\x50\x4E\x47\x0D\x0A\x1A\x0A': 'PNG',
-            b'\x47\x49\x46\x38\x39\x61': 'GIF87a',
-            b'\x47\x49\x46\x38\x37\x61': 'GIF89a',
-            b'\x42\x4D': 'BMP',
-            b'\x50\x4B\x03\x04': 'ZIP',
-            b'\x50\x4B\x05\x06': 'ZIP',
-            b'\x50\x4B\x07\x08': 'ZIP',
-            b'\x25\x50\x44\x46': 'PDF',
-            # Agrega más magic numbers para otros tipos de archivos aquí
-        }
+    def get_data_type(content)->str:
+        decoded_bytes = b64decode(content[:100])
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(decoded_bytes)
+        return mimetypes.guess_extension(file_type).replace('.','')
 
-        # Search for the magic number in the first bytes of the decoded data
-        for magic_number, file_type in magic_numbers.items():
-            if byte_content.startswith(magic_number):
-                return file_type
-        
-        
-        return None
 
     @staticmethod
     def print(message, color='green'):

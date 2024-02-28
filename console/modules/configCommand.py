@@ -41,9 +41,6 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
                 for opt in Settings.setting:
                     if opt.startswith(section):
                         completions.append(opt)
-        
-        
-            
 
         return completions if len(completions)>0 else tuple(Settings.setting.keys())
         
@@ -65,25 +62,36 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
             else:
                 for section in Settings.setting[value]:
                     AnsiPrint.print(f"\t[bold]{section}:[reset]{Settings.setting[value][section]}")
+    
+
+    def do_unset(self, args:cmd2.Statement):
+        self.do_set(args)
 
     def do_set(self, args:cmd2.Statement):
-        if len(args.arg_list) != 3:
+        
+        # if len(args.arg_list) != 3:
+        #     
+        if args.command == 'unset':
+            value = None
+        elif args.command == 'set' and len(args.arg_list) != 3:
             AnsiPrint.print_error("")
+            return False
         else:
-            # option, value = self.get_arguments(args)
-            section = args.arg_list[0]
-            option = args.arg_list[1]
             value = args.arg_list[2]
+        
+        section = args.arg_list[0]
+        option = args.arg_list[1]
+        
 
-            if section in Settings.setting:
-                if option in Settings.setting[section]:
-                    Settings.setting[section][option]=value
-                else:
-                    AnsiPrint.print_error(f'Config option {option} {value} is not recognized')
-
+        if section in Settings.setting:
+            if option in Settings.setting[section]:
+                Settings.setting[section][option]=value
             else:
-                AnsiPrint.print_error(f'Argument {option} {value} is not recognized')
-                return False
+                AnsiPrint.print_error(f'Config option {option} {value} is not recognized')
+
+        else:
+            AnsiPrint.print_error(f'Argument {option} {value} is not recognized')
+            return False
     
     def do_options(self, args):
         args.arg_list.append('config')

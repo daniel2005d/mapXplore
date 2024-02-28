@@ -3,7 +3,9 @@ from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 from db import DataBase
 from utils.utils import CastDB
 from model.result import Result
+from model.query import Query
 from config.settings import Settings
+from typing import List
 
 class PostgreSQL(DataBase):
 
@@ -12,10 +14,13 @@ class PostgreSQL(DataBase):
         return "postgres"
 
     def _get_cursor(self):
-            self._conn = psycopg2.connect(dbname=self._database, user=self.username, password=self.password, host=self.host)
-            self._conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT);
-            cursor = self._conn.cursor()
-            return cursor
+            try:
+                self._conn = psycopg2.connect(dbname=self._database if self._database is not None else self.principal_database, user=self.username, password=self.password, host=self.host)
+                self._conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT);
+                cursor = self._conn.cursor()
+                return cursor
+            except Exception as e:
+                raise e
                 
     def _destroy(self, cursor):
         cursor.close()
@@ -93,12 +98,16 @@ class PostgreSQL(DataBase):
         
         return sentence
     
+    def test_connection(self):
+        cur = self._get_cursor()
+        cur.close()
+
     def execute_query(self, query:str):
         return self._select(query, showColumns=True)
     
-    def create_query_to_all_values(self, filter:str,operator:str='ilike', logic_operator:str='or'):
+    def create_query_to_all_values(self, filter:str,operator:str='or', logic_operator:str='or') -> List[Query]:
         rows = self.get_tables_and_columns()
-        queries = []
+        queries:List[Query] = []
         for row in rows:
             tablename = row[0]
             columns = row[1]
@@ -115,8 +124,8 @@ class PostgreSQL(DataBase):
                     else:
                         sentence+=f"{operator} {CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
             sentence=f"Select {columns_list[:-1]} from {tablename} where {sentence}"
-            queries.append({"tablename":tablename,"sentence":sentence})
-        
+            queries.append(Query(word=filter, sentence=sentence, tablename=tablename))
+
         return queries
         
     
@@ -206,7 +215,6 @@ class PostgreSQL(DataBase):
                 columns = self._get_columns_from_table(tablename)
             elif not self._hashcolumn in columns:
                 columns.append(self._hashcolumn)
-
 
             parameters = ''
             columns_insert=''

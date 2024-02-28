@@ -1,14 +1,17 @@
 from connection import Connection
 from utils.utils import Hashing
+from config.settings import Settings
 
 class DataBase:
     def __init__(self, dbname:str, connectionsettings:Connection):
-            self.username = connectionsettings.username
-            self.password = connectionsettings.password
-            self.host = connectionsettings.server
+            if connectionsettings is not None:
+                self.username = connectionsettings.username
+                self.password = connectionsettings.password
+                self.host = connectionsettings.server
+
             self._database = dbname
             self._status_handler = None
-            self._hashcolumn = "sqlmap_hash"
+            self._hashcolumn = Settings.checksum_column
             self._recreate = True
             self._tables = []
     
@@ -32,11 +35,16 @@ class DataBase:
     def status_handler(self, value):
         self._status_handler = value
 
+    def _get_columns(self, tablename:str):
+        pass
+
+    def _get_columns_from_table(self, tablename:str):
+        pass
     """
     Check if Table exists
     """
     def check_exists_table(self, tablename:str) -> bool:
-        pass
+        raise ModuleNotFoundError("Not implemented")
 
     """
     If database exists, drop and create
@@ -59,12 +67,6 @@ class DataBase:
     def search_columns(self, filter:str):
         pass
 
-    def _get_columns(self, tablename:str):
-        pass
-
-    def _get_columns_from_table(self, tablename:str):
-        pass
-
     def get_tables_and_columns(self):
         pass
 
@@ -76,6 +78,9 @@ class DataBase:
         pass
 
     def execute_query(self, query:str):
+        pass
+
+    def test_connection(self):
         pass
 
     def _gethash(self, data):
