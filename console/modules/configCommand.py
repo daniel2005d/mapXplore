@@ -70,18 +70,21 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
 
     def do_set(self, args:cmd2.Statement):
         try:
+            section, option, value = None, None, None
+            if self._section is not None:
+                section = self._section
+                option = args.arg_list[0]
+                value = args.arg_list[1]
+            else:
+                section = args.arg_list[0]
+                option  = args.arg_list[1]
+                value = args.arg_list[2] if len(args.arg_list)>2 else None
             if args.command == 'unset':
-                Settings.set_value(self._section, args.arg_list[0], None)
+                
+
+                Settings.set_value(section, option, None)
             elif args.command == 'set':
-                section, option, value = None, None, None
-                if self._section is not None:
-                    section = self._section
-                    option = args.arg_list[0]
-                    value = args.arg_list[1]
-                else:
-                    section = args.arg_list[0]
-                    option  = args.arg_list[1]
-                    value = args.arg_list[2]
+                
 
                 if section if self._section != section else option in self._config:
                     Settings.set_value(section, option, value)

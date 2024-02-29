@@ -10,8 +10,11 @@ import i18n.locale as locale
 
 @with_default_category('Query Category')
 class QueryCommandSet(CommandSet, ArgumentsManager):
-    def __init__(self) -> None:
+    def __init__(self, args) -> None:
         super().__init__()
+        if args is not None:
+            if args.config:
+                Settings.load_settings(args.config)
         self._filter_options = Settings.filter_options
         self._result_options = Settings.setting["Results"]
         self._core = Running()

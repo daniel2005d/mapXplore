@@ -35,7 +35,18 @@ class PostgreSQL(DataBase):
             return generated
         except Exception as e:
             raise e
-    
+
+    def _executemany(self, sentence, values=None):
+        try:
+            cur = self._get_cursor()
+            generated = cur.executemany(sentence, values)
+            self._conn.commit()
+            self._destroy(cur)
+            return generated
+        except Exception as e:
+            raise e
+
+
     def _select(self, sentence: str, values=None, showColumns = False):
         rows = []
         cur = self._get_cursor()
@@ -208,41 +219,42 @@ class PostgreSQL(DataBase):
                   self._execute(f"CREATE UNIQUE INDEX IF NOT EXISTS {tablename}_{self._hashcolumn}_idx ON public.{tablename} USING btree ({self._hashcolumn})")
         except Exception as e:
             raise e
-  
+    
+    def _get_sentence(self, tablename, data, columns=None):
+        if columns is None:
+                columns = self._get_columns_from_table(tablename)
+        elif not self._hashcolumn in columns:
+            columns.append(self._hashcolumn)
+        
+        columns_lower = ', '.join(f'"{column.lower()}"' for column in columns)
+        parameters = ','.join('%s' for _ in columns)
+
+        sentence=f"""    
+                    INSERT INTO {tablename} ({columns_lower})
+                    VALUES ({parameters})
+                    ON CONFLICT ({self._hashcolumn}) DO NOTHING
+                """
+
+        return sentence
+
+
     def insert_data(self, tablename, data, columns=None):
         try:
-            if columns is None:
-                columns = self._get_columns_from_table(tablename)
-            elif not self._hashcolumn in columns:
-                columns.append(self._hashcolumn)
-
-            parameters = ''
-            columns_insert=''
-            
-            """
-            Calculate MD5 for all data
-            """
-            for index, c in enumerate(columns):
-                columns_insert+=f'"{c.lower()}"'
-                if index != len(columns)-1:
-                    columns_insert+=','
-
-            for index, column in enumerate(data):
-                parameters+="%s"
-                if index != len(data)-1:
-                    parameters+=","
-            
-            
-
-            sentence=f"""    
-                        INSERT INTO {tablename} ({columns_insert})
-                        VALUES ({parameters})
-                        ON CONFLICT ({self._hashcolumn}) DO NOTHING
-                    """
+            sentence = self._get_sentence(tablename, data, columns)
+            #if len(data)==1:
             self._execute(sentence, data)
+            # else:
+            #     self._executemany(sentence, data)
         except Exception as e:
             raise e
     
+    def insert_many(self, tablename, data, columns=None):
+        try:
+            sentence = self._get_sentence(tablename, data, columns)
+            self._executemany(sentence, data)
+        except Exception as e:
+            raise e
+
 
     def search_tables(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
         result = Result(headers=['tables'])

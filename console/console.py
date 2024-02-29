@@ -49,10 +49,10 @@ class MainConsole(cmd2.Cmd):
         for command in self._commands:
             self.do_back(command["module"])
 
-        if arg  is None:
-            module = QueryCommandSet()
+        if not hasattr(arg, 'module'):
+            module = QueryCommandSet(arg)
         elif arg.module == 'import':
-            module = ImportCommand(arg)
+            module = ImportCommand()
         elif arg.module == 'config':
             module = ConfigCommandSet(arg, section=arg.section)
 
@@ -84,8 +84,8 @@ class MainConsole(cmd2.Cmd):
     def do_use(self, arg):
         self._load_module(arg)
 
-def main():
+def main(args):
     
     app = MainConsole()
-    app._load_module(None)
+    app._load_module(args)
     app.cmdloop()

@@ -61,6 +61,9 @@ class DataBase:
     def insert_data(self, tablename, data, columns=None):
         raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
+    def insert_many(self, tablename, data, columns=None):
+        raise ModuleNotFoundError(f"{str(self)} Not implemented")
+    
     def search_tables(self, filter:str):
         raise ModuleNotFoundError(f"{str(self)} Not implemented")
 

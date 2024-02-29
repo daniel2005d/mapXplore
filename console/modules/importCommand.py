@@ -7,7 +7,7 @@ from utils.ansiprint import AnsiPrint
 
 @with_default_category('Import Category')
 class ImportCommand(CommandSet):
-    def __init__(self, args) -> None:
+    def __init__(self) -> None:
         super().__init__()
         self._core = Import()
         self._config_key = "sqlmap"

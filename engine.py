@@ -4,6 +4,7 @@ Allow to find information over imported databases
 from database.connection import Connection
 from dbConnector import DbConnector
 from console import console
+import argparse
 from utils.ansiprint import AnsiPrint
 from middle import __VERSION__
 
@@ -24,7 +25,9 @@ def show_banner():
     
     AnsiPrint.print(banner)
 
-
+parser = argparse.ArgumentParser()
+parser.add_argument('--config', required=False)
+args = parser.parse_args()
 
 show_banner()
-console.main()
+console.main(args)

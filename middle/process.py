@@ -120,8 +120,6 @@ class Import():
             try:
                 self._summary["files"].append(file)
                 file_path = os.path.join(directory, file)
-                if "Books" in file_path:
-                    print("")
                 self.insert_data(database,file_path)
             except Exception as e:
                 txt = f"Error into {file} => {str(e)}"
@@ -139,13 +137,16 @@ class Import():
         if file_name not in self._summary["tables"]:
             self._summary["tables"].append(file_name)
         db.create_table(file_name, table_columns)
-        for index, line in enumerate(file_content.rows):
-            try:
-                self._summary["rows"]+=index
-                AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{index}/{len(file_content.rows)-1}]", end='')
-                db.insert_data(file_name, line, table_columns)
-            except Exception as e:
-                txt = f"Error into {file_name} index {index} {e}"
-                AnsiPrint.print_error(txt)
+        db.insert_many(file_name,file_content.rows, table_columns)
+        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)-1}]", end='')
+        self._summary["rows"]+=len(file_content.rows)
+        # for index, line in enumerate(file_content.rows):
+        #     try:
+        #         self._summary["rows"]+=index
+        #         AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{index}/{len(file_content.rows)-1}]", end='')
+        #         db.insert_data(file_name, line, table_columns)
+        #     except Exception as e:
+        #         txt = f"Error into {file_name} index {index} {e}"
+        #         AnsiPrint.print_error(txt)
         
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[green][Success][reset]")
+        AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]")
