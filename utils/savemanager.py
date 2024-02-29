@@ -1,5 +1,3 @@
-
-
 from config.settings import Settings
 import os
 from datetime import datetime
@@ -65,7 +63,4 @@ class SaveManager:
             text+=delimiter.join(row)
             text+="\r\n"
         return text
-        
-            
-
-
+    

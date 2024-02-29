@@ -15,11 +15,12 @@ def get(key):
     if translations is None:
         get_text()
     
+    sections = translations
     content = key.split('.')
     for index, option in enumerate(content):
-        if option in translations:
+        if option in sections:
             if index == len(content)-1:
-                return translations.get(option)
+                return sections.get(option)
             else:
-                translations = translations.get(option)
-    return ""    
+                sections = sections.get(option)
+    return ""

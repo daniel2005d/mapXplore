@@ -1,16 +1,17 @@
 from dbConnector import DbConnector
-from utils.ansiprint import AnsiPrint
 from config.settings import Settings
-from utils.utils import Hashing
-import i18n.locale as locale
+from utils.ansiprint import AnsiPrint
+from utils.stopwatch import Stopwatch
 from middle.filemanager import FileManager
+from middle.mapexception import MapXploreException
 from model.filecontent import FileContent
-import re
+from model.result import Result
+import i18n.locale as locale
 import os
 
+
 class Import():
-    def __init__(self, args) -> None:
-        Settings.sqlmap_config(args)
+    def __init__(self) -> None:
         self._summary = None
         self._db = None
 
@@ -21,7 +22,6 @@ class Import():
         if config["database"] is not None and config["database"] != "":
             self._database = config["database"]
         self._directory = config["input"]
-        self._recreate = config["recreate"]
         self._delimiter = config["csvdelimiter"]
         self._dbConfig = Settings.setting["Database"]
         
@@ -46,58 +46,67 @@ class Import():
             return [],None
     
     def _print_summary(self):
+        summary = Result()
         if self._summary is not None:
             AnsiPrint.print_info(locale.get("import.databasetitle"))
+            headers = locale.get("import.summary_table_titles")
+            summary.headers=headers
             for db in self._summary["databases"]:
-                AnsiPrint.print(db)
-                
-            AnsiPrint.print_info(locale.get("import.tablestitle"))
-            for table in self._summary["tables"]:
-                AnsiPrint.print(table)
+                summary.rows.append(['Database', db])
             
-            AnsiPrint.print_info(locale.get("import.filestitle"))
+            for table in self._summary["tables"]:
+                summary.rows.append(['Table', table])
+            
             for file in self._summary["files"]:
-                AnsiPrint.print(file)
+                summary.rows.append(['File', file])
 
-            total_title = locale.get("import.totaltitle")
-            total_rows = self._summary["rows"]
-            AnsiPrint.print_info(f"{total_title}:{total_rows}")
+            summary.rows.append([locale.get("import.totaltitle"), self._summary["rows"]])
+            summary.rows.append([locale.get("import.total_time_title"), self._summary["elapsed"]])
 
-
+            AnsiPrint.printResult(summary)
+    
     def start(self):
-        self._summary = {
-            "databases":[],
-            "tables":[],
-            "rows":0,
-            "files":[]
+        try:
+            stopwatch = Stopwatch()
+            stopwatch.start()
+            self._summary = {
+                "databases":[],
+                "tables":[],
+                "rows":0,
+                "files":[],
+                "elapsed":""
 
-        }
-        self._bind_config()
-        directories = []
-        
-        dump_dir = ""
-        if self._database is None:
-            directories,dump_dir = self._get_directories(self._directory)
-        else:
-            dump_dir = os.path.join(self._directory,"dump")
-            if not os.path.exists(dump_dir):
-                AnsiPrint.print_error(f"Directory {dump_dir} does not exists")
+            }
+            self._bind_config()
+            directories = []
+            
+            dump_dir = ""
+            if self._database is None:
+                directories,dump_dir = self._get_directories(self._directory)
+            else:
+                dump_dir = os.path.join(self._directory,"dump")
+                if not os.path.exists(dump_dir):
+                    AnsiPrint.print_error(f"Directory {dump_dir} does not exists")
 
-            directories.append(self._database)
+                directories.append(self._database)
 
-        if directories is not None:
-            for dir in directories:
+            if directories is not None:
+                for dir in directories:
 
-                self._summary["databases"].append(dir.lower())
-                AnsiPrint.print(f"Creating database [yellow][bold]{dir.lower()}[reset]")
+                    self._summary["databases"].append(dir.lower())
+                    AnsiPrint.print(f"Creating database [yellow][bold]{dir.lower()}[reset]")
 
-                db = self._get_connection()
-                db.create_database(dir)
-                self.create_tables(dir, os.path.join(dump_dir, dir))
-        else:
-            AnsiPrint.print_error(f'The {dump_dir} directory does not exists.')
-        
-        self._print_summary()
+                    db = self._get_connection(Settings.principal_databases.get(self._dbConfig["dbms"]))
+                    db.create_database(dir)
+                    self.create_tables(dir, os.path.join(dump_dir, dir))
+            else:
+                AnsiPrint.print_error(f'The {dump_dir} directory does not exists.')
+            
+            stopwatch.stop()
+            self._summary["elapsed"]= str(stopwatch)
+            self._print_summary()
+        except Exception as e:
+            AnsiPrint.print_error(e)
 
     def create_tables(self, database:str, directory:str):
         
@@ -124,7 +133,6 @@ class Import():
         file = os.path.basename(path)
         index_ext = file.index('.')
         file_name = file[:index_ext].lower()
-        AnsiPrint.print(f"Dumping [green]{file}[reset]")
         file_content = csv.get_structure(path)
         ## Create Table and Columns
         table_columns = file_content.headers

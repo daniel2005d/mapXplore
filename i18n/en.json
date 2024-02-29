@@ -1,18 +1,37 @@
 {
+
     "notfound":"Not results found for [yellow]{word}[reset]",
     "summary":"Summary",
     "savefiles":"Saving file of the [yellow]{key}[reset] column",
     "cannot_export":"No queries have been generated yet",
     "summary_total":"[light_green_2]Total found [bold]{length}[reset]",
-    "help_import":"Enables importing the results obtained from running sqlmap to a PostgreSQL or MongoDB database, facilitating searches with greater ease",
+    "help_import":"Allow importing the results obtained from running sqlmap to a PostgreSQL or sqlite database, facilitating searches with greater ease",
     "dir_not_not":"Directory [bold]{directory}[reset] not exists",
     "databasenull":"You need set database name option",
     "import":{
+        "input_required":"[!] [yellow]You must set import input folder[reset]",
         "title":"Summary",
         "databasetitle":"[green]Imported Databases[reset]",
         "tablestitle":"[green]Imported Tables[reset]",
         "filestitle":"[green]Processed Files[reset]",
-        "totaltitle":"[green]Imported Rows[reset]"
+        "totaltitle":"Imported Rows",
+        "summary_table_titles":["Type", "Name"],
+        "total_time_title":"Elapsed time: "
+    },
+    "config":{
+            "saved":"The [bold]{filename}[reset] file was saved successfully",
+            "loaded":"The [bold]{filename}[reset] file was loaded successfully",
+            "overwrite_file":"[bold]Dou you want overwrite file?[reset] [Y/n]"
+    },
+    "help":{
+        "query":"from cmd2 import Cmd2ArgumentParser, with_argparser",
+        "save_config":"Allow to store or load the configuration in a JSON file",
+        "filename":"The full path to export or import config settings"
+    },
+    "errors":{
+        "file_exists":"The file exists",
+        "file_not_exists":"{file} does not  exists",
+        "section_config_error":"The [bold]{section}[reset] setting does not exists"
     }
 
 }

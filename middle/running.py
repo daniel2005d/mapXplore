@@ -1,5 +1,6 @@
 from dbConnector import DbConnector
 from config.settings import Settings
+from config.settings import ResultSetting
 from model.result import Result
 from enum import Enum
 from utils.ansiprint import AnsiPrint
@@ -26,7 +27,6 @@ class Running:
         self._export_manager = SaveManager()
         self._output_settings = Settings.setting["Results"]
         self._cursor = None
-        
     
     def _validate_arguments(self) -> bool:
         result = True
@@ -46,6 +46,8 @@ class Running:
                             username=self._dbConfig["username"], password=self._dbConfig["password"], 
                             dbms=self._dbConfig["dbms"])
             self._cursor = db._createDBEngine()
+
+            AnsiPrint.printSetting("Database")
     
     def _get_values_to_find(self, word:str)->str:
         criterial = []
@@ -56,6 +58,17 @@ class Running:
                 criterial.append(b64encode(value.encode()).decode())
         
         return criterial
+    
+    def _filter_by_document(self, word:str, data:str, format:str):
+        """Search information in Documents with base64 format
+
+        Args:
+            word (str): Word to search
+            data (str): Base64 data
+            format (str): File Type
+        """
+        if ResultSetting.include_documents:
+            pass
 
     def _filter_by_value(self, value_to_find):
         results_list = []
@@ -67,8 +80,9 @@ class Running:
         found = False
         total = 0
         for qry in queries:
-            
+            AnsiPrint.print(f"[cyan]{qry.tablename}[reset]", end='')
             results = self.run_query(qry.sentence, qry.word)
+            AnsiPrint.print(''*(len(qry.tablename)*5),end='\r')
             if results.length > 0:
                 total+=results.length
                 results.table_name = qry.tablename
@@ -106,11 +120,31 @@ class Running:
             self._save(format)
         else:
             AnsiPrint.print_info(locale.get("cannot_export"))
+    
+    def _format_b64_data(self, text:str, value_to_hight_light:str, file_name:str):
+        data,format = Util.is_base64(text)
+        if data is not None: # Is Base64 
+            self._filter_by_document(value_to_hight_light, data, format)
+            if format.lower() != 'txt':
+                column_formatted = Color.format(f"{text[0:50]}[cyan][{format if format is not None else 'Truncated... [red][{format}]'}][reset]")
+            else:
+                column_formatted, _ =  Color.highlight_text(data+"[cyan][fromBase64][reset]", value_to_hight_light)
+        else:
+            column_formatted, _ =  Color.highlight_text(text, value_to_hight_light)
+        
+        if data is not None and format is not None:
+            if self._output_settings["savefiles"]:
+                AnsiPrint.print_info(locale.get("savefiles").format(key=file_name))
+                self._export_manager.save(data, format)
+        return column_formatted
 
-    """
-    Run the query and highlight the text that matches.
-    """
     def run_query(self, sentence, value_to_hight_light):
+        """Run the query and highlight the text that matches.
+    
+        Args:
+            sentence (str): Run T-SQL query with relevant information
+            value_to_hight_light (str): Text to hight light
+        """
         result = self._cursor.execute_query(sentence)
         information = Result()
         if result is not None and len(result)>0:
@@ -123,25 +157,9 @@ class Running:
                 formatted_columns = []
                 for key in row:
                     column_value = str(row[key])
-                    data,format = Util.is_base64(column_value)
+                    column_formatted = self._format_b64_data(column_value, value_to_hight_light, key)
+                    formatted_columns.append(column_formatted)
                     columns.append(column_value)
-                    if data is not None: # Is Base64 
-                        if len(column_value) > 500:
-                            truncated_text = Color.format(f"{column_value[0:500]}[cyan][{format if format is not None else 'Truncated...'}][reset]")
-                            formatted_columns.append(truncated_text)
-                        else:
-                            column_formatted, _ =  Color.highlight_text(column_value, value_to_hight_light)
-                            formatted_columns.append(column_formatted)
-                    else:
-                        column_formatted, _ =  Color.highlight_text(column_value, value_to_hight_light)
-                        formatted_columns.append(column_formatted)
-
-                    if data is not None and format is not None:
-                        if self._output_settings["savefiles"]:
-                            AnsiPrint.print_info(locale.get("savefiles").format(key=key))
-                            self._export_manager.save(data, format)
-                    #else:
-                    
 
                 information.formatted_rows.append(formatted_columns)
                 information.rows.append(columns)
@@ -177,6 +195,3 @@ class Running:
         except Exception as e:
             AnsiPrint.print_error(e)
         return results
-    
-
-

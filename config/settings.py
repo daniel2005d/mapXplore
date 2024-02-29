@@ -1,26 +1,24 @@
 from typing import List
 from utils.crypto.hashes import Hashes
+from utils.utils import Util
+from middle.mapexception import MapXploreException
+import i18n.locale as locale
 import os
+import json
 
 
 class Settings:
     def __init__(self) -> None:
         pass
-    
-    @staticmethod
-    def sqlmap_config(args):
-        if args.input is not None:
-            Settings.setting["sqlmap"]["input"]=args.input
-        if args.delimiter is not None:
-            Settings.setting["sqlmap"]["csvdelimiter"] = args.delimiter
-        if args.database is not None:
-            Settings.setting["sqlmap"]["database"] = args.database
-        if args.recreate is not None:
-            Settings.setting["sqlmap"]["recreate"] = args.recreate
-
+   
     special_column_names={
         "TypeTitle":"TypeFormat_{col_name}",
         "ContentTitle":"DataFromBase64_{col_name}"
+    },
+
+    principal_databases={
+        'postgres':'postgres',
+        'sqlite':None
     }
 
     checksum_column = 'sqlmap_hash'
@@ -35,31 +33,28 @@ class Settings:
             
         },
         "General":{
-            "elapsed":True,
             "includeb64":True,
-            "debug":True
+            "debug":False
         },
         "Database":{
-            "host":"30.0.1.108",
-            "username":"postgres",
-            "password":"3A9eQAHluSe7",
+            "host":"",
+            "username":"",
+            "password":"",
             "database":"",
             "dbms":"postgres",
-            "recreate":True
+            "recreate":False
         },
         "Results":{
             "output":"",
             "savefiles":False,
             "format":'csv',
-            "truncate":10,
-            "csvdelimiter":","
+            "csvdelimiter":",",
+            "includedocuments":False
         },
         "sqlmap":{
-            "input":"/home/kali/.local/share/sqlmap/output/evil.com/",
+            "input":"",
             "csvdelimiter":",",
             "database":""
-            
-            
         }
     }
 
@@ -67,3 +62,48 @@ class Settings:
     @staticmethod
     def set_value(section, key, value):
         Settings.setting[section][key]=value
+    
+    @staticmethod
+    def save_settings(filename:str, override=False)->None:
+        
+        try:
+            if Util.check_file(filename) and not override:
+                raise MapXploreException(message_key="file_exists", isError=False)
+            else:
+                with open(filename, "w") as jfile:
+                    json.dump(Settings.setting, jfile)
+        except MapXploreException as e:
+            raise e
+        except Exception as e:
+            raise MapXploreException(e)
+    
+    @staticmethod
+    def load_settings(filename:str)->None:
+        
+        try:
+            if not Util.check_file(filename):
+                raise MapXploreException(message=locale.get("errors.file_not_exists").format(file=filename))
+            else:
+                with open(filename, "r") as jfile:
+                    Settings.setting = json.load(jfile)
+        except Exception as e:
+            raise MapXploreException(message=str(e))
+
+class ResultSetting:
+    _instance = None
+    
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super().__new__(cls,*args, **kwargs)
+        
+        return cls._instance
+        
+    def __init__(self) -> None:
+        self._settings = Settings.setting["Results"]
+    
+    
+    def include_documents(self) -> bool:
+        if "includedocuments" in self._settings:
+            return self._settings["includedocuments"]
+        
+        return False

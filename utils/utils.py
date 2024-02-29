@@ -1,37 +1,33 @@
 from colored import Style, fore, back
 import hashlib
-import re
 from base64 import b64decode
 import magic
 import mimetypes
+import os
+
 
 class Util:
+
+    @staticmethod
+    def check_file(file_name:str)->bool:
+        if not os.path.exists(file_name) or not os.path.isfile(file_name):
+            return False
+        
+        return True
+    
     @staticmethod
     def is_base64(text)->tuple[bytes,str]:
-        if text.startswith('data:'):
-            fragments = text.split(';')
-            if len(fragments)>1:
-                return Util.try_convert_b64(fragments[1].split(',',1)[1])
-        
-        if len(text) % 4 != 0:
-            return None,None
-        
-        # Check if all characters are valid
-        if not re.match(r'^[A-Za-z0-9+/]*={0,2}$', text):
-            return None,None
-
         try:
-            # Check if it has a checksum character
-            if len(text) > 1 and text[-1] == '=' and text[-2] == '=':
-                return Util.try_convert_b64(text)
-            elif len(text) > 0 and text[-1] == '=':
-                return Util.try_convert_b64(text)
-            else:
-                return Util.try_convert_b64(text)
+            if text.isdigit():
+                return None,None
+
+            data,mimetype = Util.try_convert_b64(text)
+            data = data.decode('latin')
+            return data,mimetype
         except:
-            pass
+            return None,None
             
-        return None,None
+        
 
     @staticmethod
     def try_convert_b64(text)->tuple[bytes,str]:
@@ -45,29 +41,23 @@ class Util:
         mime = magic.Magic(mime=True)
         file_type = mime.from_buffer(decoded_bytes)
         return mimetypes.guess_extension(file_type).replace('.','')
-
-
-    @staticmethod
-    def print(message, color='green'):
-        print(f'{fore(color)}[Info] - {message} {Style.reset}')
-
-    @staticmethod
-    def print_error(message):
-        print(f'{fore("white")}{back("red")}[Critical]{Style.reset} {fore("white")}{message}{Style.reset}')
     
     @staticmethod
-    def print_important(message):
-        print(f'{fore("blue")}[Important!]{Style.reset} {fore("white")}{message}{Style.reset}')
-
-    @staticmethod
-    def print_info(category, message):
-        print(f"{fore('yellow')}[{category}]{Style.reset}{message}")
+    def get_filename(filename:str)->str:
+        full_name = os.path.basename(filename)
+        name = os.path.splitext(full_name)[0]
+        return name
     
     @staticmethod
-    def print_line(message, color='green'):
-        print(f'{fore(color)}[Info] - {message} {Style.reset}', end='', flush=True)
+    def decode(text:str)->str:
+        decoded = text
+        try:
+            if not text.isdigit():
+                decoded = text.encode('latin').decode('unicode_escape')
+        except:
+            pass
         
-        
+        return decoded
 
 class Hashing:
     @staticmethod

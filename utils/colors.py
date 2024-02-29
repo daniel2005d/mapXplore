@@ -49,6 +49,6 @@ class Color:
             end = matches.end()
             hight_light = Color.format(f"{text[:start]}[{color}]{text[start:end]}[reset]{text[end:]}")
         
-        return hight_light, formatted
+        return Color.format(hight_light), formatted
 
         

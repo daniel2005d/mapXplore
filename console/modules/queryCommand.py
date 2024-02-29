@@ -1,11 +1,12 @@
 import cmd2
 from cmd2 import CommandSet, with_default_category
+from cmd2 import Cmd2ArgumentParser, with_argparser
 from utils.ansiprint import AnsiPrint
 from config.settings import Settings
 from middle.running import Running, QueryType
 from console.modules.argumentsManager import ArgumentsManager
 from utils.crypto.hashes import Hashes
-from utils.colors import Color
+import i18n.locale as locale
 
 @with_default_category('Query Category')
 class QueryCommandSet(CommandSet, ArgumentsManager):

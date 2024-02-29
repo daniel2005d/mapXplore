@@ -9,11 +9,14 @@ from utils.ansiprint import AnsiPrint
 class ImportCommand(CommandSet):
     def __init__(self, args) -> None:
         super().__init__()
-        self._core = Import(args)
+        self._core = Import()
         self._config_key = "sqlmap"
         self._setting = Settings.setting[self._config_key]
         if hasattr(cmd2.Cmd,'do_set'):
             delattr(cmd2.Cmd, 'do_set')
+        
+        if self._setting["input"] == '':
+            AnsiPrint.print_locale("import.input_required")
         
     set_parser = Cmd2ArgumentParser(add_help="")
     set_parser.add_argument('option', choices=list(Settings.setting["sqlmap"].keys()))

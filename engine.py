@@ -1,0 +1,30 @@
+"""
+Allow to find information over imported databases
+"""
+from database.connection import Connection
+from dbConnector import DbConnector
+from console import console
+from utils.ansiprint import AnsiPrint
+from middle import __VERSION__
+
+def show_banner():
+    banner = f"""[green]
+ ____ ____ ____ ____ ____ ____ ____ ____ ____ 
+||m |||a |||p |||X |||p |||l |||o |||r |||e ||
+||__|||__|||__|||__|||__|||__|||__|||__|||__||
+|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|/__\|
+[reset]
+    MapXplore - [bold]Version: {__VERSION__}[reset]
+    Author: [bold]Daniel Vargas[reset]
+    Repository: [bold]https://github.com/daniel2005d/mapXplore[reset]
+"""
+
+
+
+    
+    AnsiPrint.print(banner)
+
+
+
+show_banner()
+console.main()

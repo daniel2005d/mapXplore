@@ -1,7 +1,7 @@
 from database.connection import Connection
 from database.PostgreSQL import PostgreSQL
-from database.MongoDB import MongoDB
 from database.SQliteDB import SQLite
+from middle.mapexception import MapXploreException
 
 class DbConnector:
     def __init__(self,*argv, **kwargs) -> None:
@@ -32,14 +32,10 @@ class DbConnector:
             
             if self._dbms == 'postgres':
                 con = PostgreSQL(database.lower() if database is not None else None, self._connection if connection is None else connection)
-            elif self._dbms == 'mongo':
-                con = MongoDB(database, self._connection if connection is None else connection)
             elif self._dbms == 'sqlite':
                 con = SQLite(database, None)
             if con:
                 con.test_connection()
-
-                
         except Exception as e:
             raise e
         

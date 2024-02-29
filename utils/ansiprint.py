@@ -3,6 +3,8 @@ from utils.colors import Color
 import shutil
 from cmd2 import ansi, EightBitBg, RgbFg
 from config.settings import Settings
+import sys
+import i18n.locale as locale
 
 from typing import (
     Any,
@@ -21,8 +23,9 @@ class AnsiPrint:
 
     @staticmethod
     def printSetting(section:str):
-        option = Settings.setting[section]
         data_list: List[List[Any]] = list()
+        option = Settings.setting[section]
+        
         for key in option:
             data_list.append([Color.format(f"[blue]{key}[reset]"), option[key]])
 
@@ -70,13 +73,23 @@ class AnsiPrint:
     def print_error(text:str)->None:
         AnsiPrint.print(f"[red][-][bold] {text}[reset]")
         if Settings.setting["General"]["debug"]:
-            import traceback
-            traceback.print_exc()
+            exc_type, exc_value, exc_traceback = sys.exc_info()
+            if exc_traceback:
+                AnsiPrint.print_debug(str(exc_traceback.tb_frame))
 
-    
+    @staticmethod
+    def print_debug(message):
+        AnsiPrint.print(f"[bold][yellow][debug][reset] [yellow]{message} [reset]")
+
+
     @staticmethod
     def print_success(text:str)->None:
         AnsiPrint.print(f"[green][+][bold] {text}[reset]")
+    
+    @staticmethod
+    def print_locale(sectionkey:str, **kwargs)->None:
+        text = locale.get(sectionkey)
+        AnsiPrint.print(text.format(**kwargs))
 
     
     
