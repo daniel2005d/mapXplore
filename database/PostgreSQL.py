@@ -223,7 +223,7 @@ class PostgreSQL(DataBase):
         except Exception as e:
             raise e
     
-    def _get_sentence(self, tablename, data, columns=None):
+    def _get_insert_sentence(self, tablename, data, columns=None):
         if columns is None:
                 columns = self._get_columns_from_table(tablename)
         elif not self._hashcolumn in columns:
@@ -243,7 +243,7 @@ class PostgreSQL(DataBase):
 
     def insert_data(self, tablename, data, columns=None):
         try:
-            sentence = self._get_sentence(tablename, data, columns)
+            sentence = self._get_insert_sentence(tablename, data, columns)
             #if len(data)==1:
             self._execute(sentence, data)
             # else:
@@ -253,7 +253,7 @@ class PostgreSQL(DataBase):
     
     def insert_many(self, tablename, data, columns=None):
         try:
-            sentence = self._get_sentence(tablename, data, columns)
+            sentence = self._get_insert_sentence(tablename, data, columns)
             self._executemany(sentence, data)
         except Exception as e:
             raise e
