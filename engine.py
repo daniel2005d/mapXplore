@@ -2,7 +2,7 @@
 Allow to find information over imported databases
 """
 from database.connection import Connection
-from dbConnector import DbConnector
+
 from console import console
 import argparse
 from utils.ansiprint import AnsiPrint

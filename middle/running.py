@@ -1,6 +1,6 @@
 from dbConnector import DbConnector
 from config.settings import Settings
-from config.settings import ResultSetting
+from config.settings import ResultSetting, DatabaseSetting
 from model.result import Result
 from enum import Enum
 from utils.ansiprint import AnsiPrint
@@ -21,54 +21,33 @@ class QueryType(Enum):
 
 class Running:
     def __init__(self) -> None:
-        self._general = Settings.setting["General"]
-        self._dbConfig = Settings.setting["Database"]
         self._results = []
         self._export_manager = SaveManager()
-        self._output_settings = Settings.setting["Results"]
         self._cursor = None
     
     def _validate_arguments(self) -> bool:
         result = True
-        if self._dbConfig["dbms"] == 'sqlite':
-            if self._dbConfig["database"] is None:
-                result = False
-                AnsiPrint.print_error(locale.get("databasenull"))
-        elif self._dbConfig["dbms"] == 'postgres':
-            if self._dbConfig["database"] is None:
-                result = False
-                AnsiPrint.print_error(locale.get("databasenull"))
+        if DatabaseSetting().database_name is None:
+            result = False
+            AnsiPrint.print_error(locale.get("databasenull"))
+        
         return result
 
     def _create_dbCursor(self):
         if self._validate_arguments():
-            db = DbConnector(database=self._dbConfig["database"], host=self._dbConfig["host"], 
-                            username=self._dbConfig["username"], password=self._dbConfig["password"], 
-                            dbms=self._dbConfig["dbms"])
+            db = DbConnector(database=DatabaseSetting().database_name, host=DatabaseSetting().host, 
+                            username=DatabaseSetting().username, password=DatabaseSetting().password, 
+                            dbms=DatabaseSetting().dbms)
             self._cursor = db._createDBEngine()
-
-            AnsiPrint.printSetting("Database")
+            
     
     def _get_values_to_find(self, word:str)->str:
         criterial = []
         words = word.split(',')
         for value in words:
             criterial.append(value)
-            if self._general["includeb64"]:
-                criterial.append(b64encode(value.encode()).decode())
-        
+            
         return criterial
-    
-    def _filter_by_document(self, word:str, data:str, format:str):
-        """Search information in Documents with base64 format
-
-        Args:
-            word (str): Word to search
-            data (str): Base64 data
-            format (str): File Type
-        """
-        if ResultSetting.include_documents:
-            pass
 
     def _filter_by_value(self, value_to_find):
         results_list = []
@@ -104,9 +83,9 @@ class Running:
         return Hashes.get_hash_value(text.strip(), hash_type)
     
     def _save(self, format:str=None)->str:
-        file_format = self._output_settings["format"] if format is None else format
+        file_format = ResultSetting().format if format is None else format
         if file_format in Settings.valid_format_files:
-            csv_delimiter = self._output_settings["csvdelimiter"]
+            csv_delimiter = ResultSetting().csv_delimiter
             current_date = datetime.now()
             format_date = current_date.strftime("%Y%m%d%H%M%S")
             for item in self._results:
@@ -124,7 +103,7 @@ class Running:
     def _format_b64_data(self, text:str, value_to_hight_light:str, file_name:str):
         data,format = Util.is_base64(text)
         if data is not None: # Is Base64 
-            self._filter_by_document(value_to_hight_light, data, format)
+            
             if format.lower() != 'txt':
                 column_formatted = Color.format(f"{text[0:50]}[cyan][{format if format is not None else 'Truncated... [red][{format}]'}][reset]")
             else:
@@ -133,7 +112,7 @@ class Running:
             column_formatted, _ =  Color.highlight_text(text, value_to_hight_light)
         
         if data is not None and format is not None:
-            if self._output_settings["savefiles"]:
+            if ResultSetting().save_files:
                 AnsiPrint.print_info(locale.get("savefiles").format(key=file_name))
                 self._export_manager.save(data, format)
         return column_formatted

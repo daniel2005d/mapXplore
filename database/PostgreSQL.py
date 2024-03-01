@@ -118,26 +118,29 @@ class PostgreSQL(DataBase):
     
     def create_query_to_all_values(self, filter:str,operator:str='or', logic_operator:str='or') -> List[Query]:
         rows = self.get_tables_and_columns()
-        queries:List[Query] = []
-        for row in rows:
-            tablename = row[0]
-            columns = row[1]
-            sentence = ""
-            columns_list = ""
-            for index, col in enumerate(columns):
-                definition = col.split(':')
-                column_name = f'"{definition[0]}"'
-                columns_list+=f"{column_name},"
-                data_type = definition[1]
-                if data_type not in Settings.exclude_data_type:
-                    if index == 0:
-                        sentence+=f"{CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
-                    else:
-                        sentence+=f"{operator} {CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
-            sentence=f"Select {columns_list[:-1]} from {tablename} where {sentence}"
-            queries.append(Query(word=filter, sentence=sentence, tablename=tablename))
+        if rows is not None:
+            queries:List[Query] = []
+            for row in rows:
+                tablename = row[0]
+                columns = row[1]
+                sentence = ""
+                columns_list = ""
+                for index, col in enumerate(columns):
+                    definition = col.split(':')
+                    column_name = f'"{definition[0]}"'
+                    columns_list+=f"{column_name},"
+                    data_type = definition[1]
+                    if data_type not in Settings.exclude_data_type:
+                        if index == 0:
+                            sentence+=f"{CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
+                        else:
+                            sentence+=f"{operator} {CastDB.cast_column(column_name, data_type)} ilike '%{filter}%' "
+                sentence=f"Select {columns_list[:-1]} from {tablename} where {sentence}"
+                queries.append(Query(word=filter, sentence=sentence, tablename=tablename))
 
-        return queries
+            return queries
+        
+        return []
         
     
     def get_tables_and_columns(self):

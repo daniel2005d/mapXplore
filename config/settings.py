@@ -33,7 +33,6 @@ class Settings:
             
         },
         "General":{
-            "includeb64":True,
             "debug":False
         },
         "Database":{
@@ -48,8 +47,7 @@ class Settings:
             "output":"",
             "savefiles":False,
             "format":'csv',
-            "csvdelimiter":",",
-            "includedocuments":False
+            "csvdelimiter":","
         },
         "sqlmap":{
             "input":"",
@@ -85,25 +83,98 @@ class Settings:
                 raise MapXploreException(message=locale.get("errors.file_not_exists").format(file=filename))
             else:
                 with open(filename, "r") as jfile:
-                    Settings.setting = json.load(jfile)
+                    Settings.setting.update(json.load(jfile))
         except Exception as e:
             raise MapXploreException(message=str(e))
 
-class ResultSetting:
+class BaseSetting:
     _instance = None
-    
+    __setting_key__ = None
     def __new__(cls, *args, **kwargs):
         if not cls._instance:
             cls._instance = super().__new__(cls,*args, **kwargs)
         
         return cls._instance
+
+    def _get_value(self, key)->str:
+        setting = Settings.setting[self.__setting_key__]
+        value = None
+        if key in setting:
+            value = setting[key]
+            if not value:
+                value = None
         
-    def __init__(self) -> None:
-        self._settings = Settings.setting["Results"]
+        return value
+
+    def _get_bool(self, key)->bool:
+        value = self._get_value(key)
+        return value if value is not None else False
+
+class ResultSetting(BaseSetting):
+
+    __setting_key__ = "Results"
+
+    @property
+    def output(self)->str:
+        return self._get_value("output")
     
+    @property
+    def save_files(self)->bool:
+        return self._get_bool("savefiles")
     
-    def include_documents(self) -> bool:
-        if "includedocuments" in self._settings:
-            return self._settings["includedocuments"]
-        
-        return False
+    @property
+    def format(self)->str:
+        return self._get_value("format")
+    
+    @property
+    def csv_delimiter(self)->str:
+        return self._get_value("csvdelimiter")
+    
+class DatabaseSetting(BaseSetting):
+    __setting_key__ = "Database"
+    
+    @property
+    def section_name(self) -> str:
+        return self._key
+    
+    @property
+    def host(self)->str:
+        return self._get_value("host")
+    
+    @property
+    def database_name(self)->str:
+        return self._get_value("database")
+    
+    @property
+    def dbms(self)->str:
+        return self._get_value("dbms")
+    
+    @property
+    def username(self)->str:
+        return self._get_value("username")
+    
+    @property
+    def password(self)->str:
+        return self._get_value("password")
+
+class GeneralSetting(BaseSetting):
+    __setting_key__ = "General"
+
+    @property
+    def isDebug(self)->bool:
+        return self._get_bool("debug")
+    
+class SqlMapSetting(BaseSetting):
+    __setting_key__ = "sqlmap"
+
+    @property
+    def file_input(self)->str:
+        return self._get_value("input")
+    
+    @property
+    def csv_delimiter(self)->str:
+        return self._get_value("csvdelimiter")
+
+    @property
+    def database(self)->str:
+        return self._get_value("database")

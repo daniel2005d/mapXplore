@@ -8,6 +8,8 @@ import os
 
 class Util:
 
+    
+
     @staticmethod
     def check_file(file_name:str)->bool:
         if not os.path.exists(file_name) or not os.path.isfile(file_name):
@@ -17,8 +19,11 @@ class Util:
     
     @staticmethod
     def is_base64(text)->tuple[bytes,str]:
+        invalid_b64_chars = ['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', ':', ';', '<', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
         try:
             if text.isdigit():
+                return None,None
+            elif any(char in invalid_b64_chars for char in text):
                 return None,None
 
             data,mimetype = Util.try_convert_b64(text)
@@ -36,7 +41,7 @@ class Util:
         return b64bytes,data_format
     
     @staticmethod
-    def get_data_type(content)->str:
+    def get_data_type(content:bytes)->str:
         decoded_bytes = b64decode(content[:100])
         mime = magic.Magic(mime=True)
         file_type = mime.from_buffer(decoded_bytes)

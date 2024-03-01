@@ -16,7 +16,7 @@
     <div class="">
         <div class="row">
             <div class="col-md-10">
-                <table class="table table-hover">
+                <table class="table table-hover" style="table-layout: fixed;">
                     <thead>
                         <tr>
                             {%for h in headers%}
@@ -31,7 +31,7 @@
             
             
                             {%for value in row%}
-                            <td>
+                            <td style="word-wrap:break-word">
                                 {{value}}
                             </td>
             

@@ -32,6 +32,7 @@
         "file_exists":"The file exists",
         "file_not_exists":"{file} does not  exists",
         "section_config_error":"The [bold]{section}[reset] setting does not exists"
+     
     }
 
 }

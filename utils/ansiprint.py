@@ -23,16 +23,22 @@ class AnsiPrint:
 
     @staticmethod
     def printSetting(section:str):
+        columns: List[Column] = list()
         data_list: List[List[Any]] = list()
         option = Settings.setting[section]
         
         for key in option:
-            data_list.append([Color.format(f"[blue]{key}[reset]"), option[key]])
+            columns.append(Column(ansi.style(key, bold=True,italic=True, bg=EightBitBg.GRAY_53), width=30))
+        
+        rows = []
+        for index, value in enumerate(option):
+            setting_value = option[value]
+            rows.append(setting_value)
+            columns[index].width = max(columns[index].width,len(str(setting_value)))
+        
+        data_list.append(rows)
 
         
-        columns: List[Column] = list()
-        columns.append(Column("Key", width=20))
-        columns.append(Column("Value", width=50))
         st = SimpleTable(columns)
         table = st.generate_table(data_list)
         print(table)

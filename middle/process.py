@@ -1,10 +1,9 @@
 from dbConnector import DbConnector
+from config.settings import SqlMapSetting, DatabaseSetting
 from config.settings import Settings
 from utils.ansiprint import AnsiPrint
 from utils.stopwatch import Stopwatch
 from middle.filemanager import FileManager
-from middle.mapexception import MapXploreException
-from model.filecontent import FileContent
 from model.result import Result
 import i18n.locale as locale
 import os
@@ -17,20 +16,19 @@ class Import():
 
     
     def _bind_config(self):
-        config = Settings.setting["sqlmap"]
         self._database = None
-        if config["database"] is not None and config["database"] != "":
-            self._database = config["database"]
-        self._directory = config["input"]
-        self._delimiter = config["csvdelimiter"]
-        self._dbConfig = Settings.setting["Database"]
+        if SqlMapSetting().database:
+            self._database = SqlMapSetting().database
+        self._directory = SqlMapSetting().file_input
+        self._delimiter = SqlMapSetting().csv_delimiter
+        self._dbConfig = DatabaseSetting()
         
     
     def _get_connection(self, database:str=None):
 
-        connection = DbConnector(database=database if database is not None else self._database, host=self._dbConfig["host"], 
-                    username=self._dbConfig["username"], password=self._dbConfig["password"], 
-                    dbms=self._dbConfig["dbms"])
+        connection = DbConnector(database=database if database is not None else self._database, host=self._dbConfig.host, 
+                    username=self._dbConfig.username, password=self._dbConfig.password, 
+                    dbms=self._dbConfig.dbms)
         
         self._db = connection._createDBEngine()
         return self._db
@@ -96,7 +94,7 @@ class Import():
                     self._summary["databases"].append(dir.lower())
                     AnsiPrint.print(f"Creating database [yellow][bold]{dir.lower()}[reset]")
 
-                    db = self._get_connection(Settings.principal_databases.get(self._dbConfig["dbms"]))
+                    db = self._get_connection(Settings.principal_databases.get(self._dbConfig.dbms))
                     db.create_database(dir)
                     self.create_tables(dir, os.path.join(dump_dir, dir))
             else:
