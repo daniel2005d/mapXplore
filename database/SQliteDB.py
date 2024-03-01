@@ -173,3 +173,36 @@ class SQLite(DataBase):
                         INSERT INTO {tablename} ({columns_insert})
                         VALUES ({parameters})"""
             self._execute(sentence, data)
+
+    def _get_insert_sentence(self, tablename, data, columns=None):
+        if columns is None:
+                columns = self._get_columns_from_table(tablename)
+        elif not self._hashcolumn in columns:
+            columns.append(self._hashcolumn)
+        
+        columns_lower = ', '.join(f'"{column.lower()}"' for column in columns)
+        parameters = ','.join('?' for _ in columns)
+
+        sentence=f"""    
+                    INSERT INTO {tablename} ({columns_lower})
+                    VALUES ({parameters})
+                """
+
+        return sentence
+
+    def _executemany(self, sentence, values=None):
+        try:
+            cur = self._get_cursor()
+            generated = cur.executemany(sentence, values)
+            self._conn.commit()
+            return generated
+        except Exception as e:
+            raise e
+
+
+    def insert_many(self, tablename, data, columns=None):
+        try:
+            sentence = self._get_insert_sentence(tablename, data, columns)
+            self._executemany(sentence, data)
+        except Exception as e:
+            raise e

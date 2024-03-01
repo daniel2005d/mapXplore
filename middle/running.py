@@ -52,8 +52,10 @@ class Running:
     def _filter_by_value(self, value_to_find):
         results_list = []
         queries=[]
+        values = []
 
         for value in self._get_values_to_find(value_to_find):
+            values.append(value)
             queries += self._cursor.create_query_to_all_values(value)
         
         found = False
@@ -72,7 +74,7 @@ class Running:
                 AnsiPrint.printResult(results)
 
         if found == False:
-            AnsiPrint.print_info(locale.get("notfound").format(word=qry.word))
+            AnsiPrint.print_info(locale.get("notfound").format(word='\r\n'.join(values)))
         else:
             AnsiPrint.print(locale.get("summary"))
             AnsiPrint.print(locale.get("summary_total").format(length=total))
@@ -109,7 +111,10 @@ class Running:
             else:
                 column_formatted, _ =  Color.highlight_text(data+"[cyan][fromBase64][reset]", value_to_hight_light)
         else:
-            column_formatted, _ =  Color.highlight_text(text, value_to_hight_light)
+            if format is not None:
+                column_formatted, _ =  Color.highlight_text(text if format == 'bin' else text[:100]+f"[cyan]{format}[reset]" , value_to_hight_light)
+            else:
+                column_formatted, _ =  Color.highlight_text(text, value_to_hight_light)
         
         if data is not None and format is not None:
             if ResultSetting().save_files:
@@ -152,7 +157,10 @@ class Running:
             self._create_dbCursor()
             if self._cursor is not None:
                 if hash_type is not None:
-                    value = self._get_hashes(hash_type, value)
+                    hashes = []
+                    for text in value.split(','):
+                        hashes.append(self._get_hashes(hash_type, text))
+                    value=','.join(hashes)
 
                 if option == QueryType.TABLES:
                     results = self._cursor.search_tables(value)

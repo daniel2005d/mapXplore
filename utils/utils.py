@@ -18,6 +18,15 @@ class Util:
         return True
     
     @staticmethod
+    def is_readable(content:bytes)->bool:
+        allowed_bytes = set(range(32, 127)) | {10,13}
+        allowed_bytes |= set(range(192, 256)) # Add Latin chars
+        for byte in content:
+            if byte not in allowed_bytes:
+                return False
+        return True
+
+    @staticmethod
     def is_base64(text)->tuple[bytes,str]:
         invalid_b64_chars = ['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', ':', ';', '<', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
         try:
@@ -25,9 +34,15 @@ class Util:
                 return None,None
             elif any(char in invalid_b64_chars for char in text):
                 return None,None
+            elif len(text) % 4 != 0:
+                return None, None
 
             data,mimetype = Util.try_convert_b64(text)
+            if not Util.is_readable(data):
+                return None, mimetype
+            
             data = data.decode('latin')
+            
             return data,mimetype
         except:
             return None,None
