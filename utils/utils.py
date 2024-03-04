@@ -4,7 +4,7 @@ from base64 import b64decode
 import magic
 import mimetypes
 import os
-
+from utils.filemanager import FileManager
 
 class Util:
 
@@ -25,27 +25,52 @@ class Util:
             if byte not in allowed_bytes:
                 return False
         return True
+    
+    def get_readable_content(content:bytes)->str:
+        text = ""
+        allowed_bytes = set(range(32, 127)) | {10,13}
+        allowed_bytes |= set(range(192, 256)) # Add Latin chars
+        for byte in content:
+            if byte not in allowed_bytes:
+                text+=" "
+            else:
+                text+=chr(byte)
+        
+        return text
 
     @staticmethod
     def is_base64(text)->tuple[bytes,str]:
-        invalid_b64_chars = ['!', '"', '#', '$', '%', '&', "'", '(', ')', '*', ':', ';', '<', '>', '?', '@', '[', '\\', ']', '^', '_', '`', '{', '|', '}', '~']
+        text_type = None
+        content = None
+        file_manager = FileManager()
         try:
             if text.isdigit():
-                return None,None
-            elif any(char in invalid_b64_chars for char in text):
-                return None,None
-            elif len(text) % 4 != 0:
                 return None, None
+            else:
+                try:
+                    content_bytes = b64decode(text)
+                    text_type = magic.from_buffer(content_bytes, mime=True)
+                    if text_type == 'text/plain':
+                        text_type = 'txt'
+                        if Util.is_readable(content_bytes):
+                            content = content_bytes.decode('latin')
+                        else:
+                            return None,None
+                    elif text_type == 'text/xml':
+                        text_type = 'xml'
+                        content = content_bytes.decode('latin')
+                except UnicodeDecodeError as ue:
+                    return content, text_type
+                
+                if content is None:
+                    return file_manager.get_file_type(text)
+                # elif not Util.is_readable(content):
+                #     content = Util.get_readable_content(content_bytes)
+                
+                return content, text_type
 
-            data,mimetype = Util.try_convert_b64(text)
-            if not Util.is_readable(data):
-                return None, mimetype
-            
-            data = data.decode('latin')
-            
-            return data,mimetype
-        except:
-            return None,None
+        except Exception as e:
+            return content, text_type
             
         
 

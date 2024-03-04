@@ -2,12 +2,13 @@
 
     "notfound":"Not results found for [yellow]{word}[reset]",
     "summary":"Summary",
-    "savefiles":"Saving file of the [yellow]{key}[reset] column",
+    "savefiles":"Saving file [yellow]{key}[reset]",
     "cannot_export":"No queries have been generated yet",
     "summary_total":"[light_green_2]Total found [bold]{length}[reset]",
     "help_import":"Allow importing the results obtained from running sqlmap to a PostgreSQL or sqlite database, facilitating searches with greater ease",
     "dir_not_not":"Directory [bold]{directory}[reset] not exists",
     "databasenull":"You need set database name option",
+    "saved_results":"Saved to [bold]{saved}[reset]",
     "import":{
         "input_required":"[!] [yellow]You must set import input folder[reset]",
         "title":"Summary",

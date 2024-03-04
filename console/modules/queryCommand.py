@@ -70,7 +70,7 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         if len(arg.arg_list)==1:
             query_option = QueryType.VALUES
             value = arg.arg_list[0]
-        else:
+        elif len(arg.arg_list) > 1:
             option = arg.arg_list[0]
             value = arg.arg_list[1]
             if option == 'tables':

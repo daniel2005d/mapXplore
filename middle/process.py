@@ -134,17 +134,10 @@ class Import():
         table_columns = file_content.headers
         if file_name not in self._summary["tables"]:
             self._summary["tables"].append(file_name)
+        """Create tables
+        """
+        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)-1}]", end='')
         db.create_table(file_name, table_columns)
         db.insert_many(file_name,file_content.rows, table_columns)
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)-1}]", end='')
         self._summary["rows"]+=len(file_content.rows)
-        # for index, line in enumerate(file_content.rows):
-        #     try:
-        #         self._summary["rows"]+=index
-        #         AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{index}/{len(file_content.rows)-1}]", end='')
-        #         db.insert_data(file_name, line, table_columns)
-        #     except Exception as e:
-        #         txt = f"Error into {file_name} index {index} {e}"
-        #         AnsiPrint.print_error(txt)
-        
         AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]")

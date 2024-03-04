@@ -1,21 +1,22 @@
 from config.settings import Settings
+from config.settings import ResultSetting
 import os
 from datetime import datetime
 from model.result import Result
-from typing import List
 from jinja2 import Environment, FileSystemLoader
+import base64
 
 class SaveManager:
     def __init__(self) -> None:
-        self._results = Settings.setting["Results"]
-        self._output = self._results["output"]
-        self._savefiles = self._results["savefiles"]
-        self._format = self._results["format"]
-        self._delimiter = self._results["csvdelimiter"]
-        if self._output == '':
+        self._results = ResultSetting() #Settings.setting["Results"]
+        self._output = self._results.output
+        self._savefiles = self._results.save_files
+        self._format = self._results.format
+        self._delimiter = self._results.csv_delimiter
+        if self._output is None:
             home = os.path.expanduser("~")
             self._output = os.path.join(home,'.local','share','mapXplore')
-            self._results["output"] = self._output
+            self._results.output = self._output
 
     def _create_directory(self, directory:str):
         if not os.path.exists(directory):
@@ -37,7 +38,8 @@ class SaveManager:
             format_date = current_date.strftime("%Y%m%d%H%M%S")
             name = f"{format_date}.{format}"
         
-        path = os.path.join(self._results["output"], name)
+        path = os.path.join(self._output, name)
+
         self._write_content(content, path)
         return path
     

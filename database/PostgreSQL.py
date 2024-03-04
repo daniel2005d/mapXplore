@@ -244,10 +244,7 @@ class PostgreSQL(DataBase):
     def insert_data(self, tablename, data, columns=None):
         try:
             sentence = self._get_insert_sentence(tablename, data, columns)
-            #if len(data)==1:
             self._execute(sentence, data)
-            # else:
-            #     self._executemany(sentence, data)
         except Exception as e:
             raise e
     

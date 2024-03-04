@@ -117,6 +117,10 @@ class ResultSetting(BaseSetting):
     @property
     def output(self)->str:
         return self._get_value("output")
+
+    @output.setter
+    def output(self, value)->str:
+        Settings.setting[self.__setting_key__]["output"]=value
     
     @property
     def save_files(self)->bool:

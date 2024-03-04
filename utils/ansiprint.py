@@ -81,7 +81,7 @@ class AnsiPrint:
         if Settings.setting["General"]["debug"]:
             exc_type, exc_value, exc_traceback = sys.exc_info()
             if exc_traceback:
-                AnsiPrint.print_debug(str(exc_traceback.tb_frame))
+                AnsiPrint.print_debug(f"{str(exc_value)} {str(exc_traceback.tb_frame)}")
 
     @staticmethod
     def print_debug(message):

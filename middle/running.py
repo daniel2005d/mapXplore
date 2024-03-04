@@ -10,7 +10,7 @@ from utils.savemanager import SaveManager
 from utils.crypto.hashes import Hashes
 from datetime import datetime
 import i18n.locale as locale
-from base64 import b64encode
+from base64 import b64encode, b64decode
 
 class QueryType(Enum):
     NONE = 0
@@ -24,6 +24,7 @@ class Running:
         self._results = []
         self._export_manager = SaveManager()
         self._cursor = None
+        self._files = []
     
     def _validate_arguments(self) -> bool:
         result = True
@@ -84,7 +85,12 @@ class Running:
     def _get_hashes(self, hash_type:str, text):
         return Hashes.get_hash_value(text.strip(), hash_type)
     
-    def _save(self, format:str=None)->str:
+    def _save(self, format:str=None)->None:
+        """Save results to setting format
+
+        Args:
+            format (str, optional): HTML or CSV. Defaults to None.
+        """
         file_format = ResultSetting().format if format is None else format
         if file_format in Settings.valid_format_files:
             csv_delimiter = ResultSetting().csv_delimiter
@@ -94,20 +100,43 @@ class Running:
                 content = self._export_manager.convert_content_to_plain(item, file_format, csv_delimiter)
                 file_name = f"{item.table_name if item.table_name is not None else ''}_{format_date}.{file_format}"
                 saved = self._export_manager.save(content, format, file_name)
-                AnsiPrint.print_success(f"Saved to [bold]{saved}[reset]")
+                AnsiPrint.print_locale("saved_results", saved=saved)
+            
+            self._save_files()
+        
 
-    def export(self, format:str=None):
-        if len(self._results) > 0:
-            self._save(format)
-        else:
-            AnsiPrint.print_info(locale.get("cannot_export"))
+    def _save_files(self) -> None:
+        save = SaveManager()
+        for item in self._files:
+            content = item["content"]
+            format = item["format"]
+            text = item["text"]
+            if format in ['docx','xlsx','ppt']:
+                path = save.save(b64decode(text), format)
+            else:
+                path = save.save(content, format)
+
+            AnsiPrint.print_locale("savefiles", key=path)
+        
+        self._files.clear()
+    
     
     def _format_b64_data(self, text:str, value_to_hight_light:str, file_name:str):
+        """Try to convert text from base64 to plain text
+        if savefiles settings its true this file will be save
+        Args:
+            text (str): Base64 text
+            value_to_hight_light (str): Text to hight light
+            file_name (str): File name to save
+
+        Returns:
+            _type_: _description_
+        """
         data,format = Util.is_base64(text)
         if data is not None: # Is Base64 
             
             if format.lower() != 'txt':
-                column_formatted = Color.format(f"{text[0:50]}[cyan][{format if format is not None else 'Truncated... [red][{format}]'}][reset]")
+                column_formatted = Color.format(f"{data[0:500]}[cyan][{format if format is not None else 'Truncated... [red][{format}]'}][reset]")
             else:
                 column_formatted, _ =  Color.highlight_text(data+"[cyan][fromBase64][reset]", value_to_hight_light)
         else:
@@ -117,10 +146,16 @@ class Running:
                 column_formatted, _ =  Color.highlight_text(text, value_to_hight_light)
         
         if data is not None and format is not None:
-            if ResultSetting().save_files:
-                AnsiPrint.print_info(locale.get("savefiles").format(key=file_name))
-                self._export_manager.save(data, format)
+            self._files.append({"content":data, "format":format, "text":text})
+            
+
         return column_formatted
+    
+    def export(self, format:str=None):
+        if len(self._results) > 0:
+            self._save(format)
+        else:
+            AnsiPrint.print_info(locale.get("cannot_export"))
 
     def run_query(self, sentence, value_to_hight_light):
         """Run the query and highlight the text that matches.

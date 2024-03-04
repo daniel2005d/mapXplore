@@ -60,8 +60,11 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
 
     def do_unset(self, args:cmd2.Statement):
         self.do_set(args)
+    
+    def complete_unset(self, text, line, idx, endx):
+        self.complete_set(text, line, idx, endx)
 
-    def complete_set(self, text, line, idx,endx):
+    def complete_set(self, text, line, idx, endx):
         completions = []
         for item in self._config.keys():
             if item.startswith(text):
@@ -74,14 +77,12 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
             if self._section is not None:
                 section = self._section
                 option = args.arg_list[0]
-                value = args.arg_list[1]
+                value = args.arg_list[1] if args.command == 'set' else None
             else:
                 section = args.arg_list[0]
                 option  = args.arg_list[1]
                 value = args.arg_list[2] if len(args.arg_list)>2 else None
             if args.command == 'unset':
-                
-
                 Settings.set_value(section, option, None)
             elif args.command == 'set':
                 
