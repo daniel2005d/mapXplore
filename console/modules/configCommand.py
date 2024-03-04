@@ -62,7 +62,7 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
         self.do_set(args)
     
     def complete_unset(self, text, line, idx, endx):
-        self.complete_set(text, line, idx, endx)
+        return self.complete_set(text, line, idx, endx)
 
     def complete_set(self, text, line, idx, endx):
         completions = []

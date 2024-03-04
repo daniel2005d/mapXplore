@@ -2,6 +2,7 @@ import zipfile
 import io
 from base64 import b64decode
 import xml.etree.ElementTree as ET
+import PyPDF2
 
 
 class FileManager:
@@ -27,7 +28,7 @@ class FileManager:
             
             tree = ET.parse(xml)
             root = tree.getroot()
-            for elem in root.iter("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t"):
+            for elem in root.iter("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t") or elem in root.iter("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"):
                 if elem.text:                                                                                                                                                                                                              
                     text += elem.text
         return text
@@ -46,10 +47,26 @@ class FileManager:
                         if 'word/document.xml' in zip_file.namelist():
                                 return self._read_office(zip_file, 'word/document.xml'), 'docx'
                         elif 'xl/workbook.xml' in zip_file.namelist():
-                                return 'xlsx'
+                                return self._read_office(zip_file, 'xl/workbook.xml'), 'xlsx'
                         elif 'ppt/presentation.xml' in zip_file.namelist():
                                 return 'pptx'
         
-        return file_type
+        return None, file_type
+    
+    def read_pdf(self, content:bytearray, max_pages=2)->str:
+        text = ""
+        pdf = io.BytesIO(content)
+        reader = PyPDF2.PdfFileReader(pdf)
+        pages = min(reader.numPages, max_pages)
+        for page in range(pages):
+            page_content = reader.getPage(page)
+            text+=page_content.extract_text()
+        if reader.numPages > max_pages:
+             text+=f" [green][{max_pages}/{reader.numPages}] pages[reset]"
+             
+
+        return text
+
+         
         
 

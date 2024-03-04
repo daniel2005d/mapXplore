@@ -29,7 +29,8 @@ class Util:
     def get_readable_content(content:bytes)->str:
         text = ""
         allowed_bytes = set(range(32, 127)) | {10,13}
-        allowed_bytes |= set(range(192, 256)) # Add Latin chars
+        allowed_bytes |= set(range(192, 238))
+        allowed_bytes |= set(range(240, 256)) # Add Latin chars
         for byte in content:
             if byte not in allowed_bytes:
                 text+=" "
@@ -52,13 +53,20 @@ class Util:
                     text_type = magic.from_buffer(content_bytes, mime=True)
                     if text_type == 'text/plain':
                         text_type = 'txt'
-                        if Util.is_readable(content_bytes):
+                        if text[-2:] == '==':
+                            content = Util.get_readable_content(content_bytes)
+                        elif Util.is_readable(content_bytes):
                             content = content_bytes.decode('latin')
                         else:
                             return None,None
                     elif text_type == 'text/xml':
                         text_type = 'xml'
-                        content = content_bytes.decode('latin')
+                        content = Util.get_readable_content(content_bytes)
+                    elif text_type == 'application/pdf':
+                        text_type = 'pdf'
+                        content = file_manager.read_pdf(content_bytes)
+                    elif text_type == 'application/octet-stream':
+                        return None, None
                 except UnicodeDecodeError as ue:
                     return content, text_type
                 

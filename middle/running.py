@@ -5,6 +5,7 @@ from model.result import Result
 from enum import Enum
 from utils.ansiprint import AnsiPrint
 from utils.utils import Util
+from utils.utils import Hashing
 from utils.colors import Color
 from utils.savemanager import SaveManager
 from utils.crypto.hashes import Hashes
@@ -111,7 +112,7 @@ class Running:
             content = item["content"]
             format = item["format"]
             text = item["text"]
-            if format in ['docx','xlsx','ppt']:
+            if format in ['docx','xlsx','ppt','pdf']:
                 path = save.save(b64decode(text), format)
             else:
                 path = save.save(content, format)
@@ -136,9 +137,10 @@ class Running:
         if data is not None: # Is Base64 
             
             if format.lower() != 'txt':
-                column_formatted = Color.format(f"{data[0:500]}[cyan][{format if format is not None else 'Truncated... [red][{format}]'}][reset]")
+                column_formatted = Color.format(f"{data}[cyan][{format if format is not None else 'Truncated... [red][{format}]'}][reset]")
             else:
-                column_formatted, _ =  Color.highlight_text(data+"[cyan][fromBase64][reset]", value_to_hight_light)
+                text_format = format if format is not None else "fromBase64"
+                column_formatted, _ =  Color.highlight_text(data+f"[cyan][{text_format}][reset]", value_to_hight_light)
         else:
             if format is not None:
                 column_formatted, _ =  Color.highlight_text(text if format == 'bin' else text[:100]+f"[cyan]{format}[reset]" , value_to_hight_light)
@@ -146,7 +148,8 @@ class Running:
                 column_formatted, _ =  Color.highlight_text(text, value_to_hight_light)
         
         if data is not None and format is not None:
-            self._files.append({"content":data, "format":format, "text":text})
+            if {"content":data, "format":format, "text":text} not in self._files:
+                self._files.append({"content":data, "format":format, "text":text})
             
 
         return column_formatted
