@@ -1,6 +1,7 @@
 from connection import Connection
-from utils.utils import Hashing
 from config.settings import Settings
+from model.result import Result
+from utils.utils import Hashing
 
 class DataBase:
     def __init__(self, dbname:str, connectionsettings:Connection):
@@ -55,10 +56,10 @@ class DataBase:
     def insert_many(self, tablename, data, columns=None):
         raise ModuleNotFoundError(f"{str(self)} Not implemented")
     
-    def search_tables(self, filter:str):
+    def search_tables(self, filter:str) -> Result:
         raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
-    def search_columns(self, filter:str):
+    def search_columns(self, filter:str) -> Result:
         raise ModuleNotFoundError(f"{str(self)} Not implemented")
 
     def get_tables_and_columns(self):

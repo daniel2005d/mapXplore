@@ -1,31 +1,21 @@
-from dbConnector import DbConnector
+import os
 from config.settings import Settings
 from config.settings import ResultSetting, DatabaseSetting
-from model.result import Result
-from enum import Enum
-from utils.ansiprint import AnsiPrint
-from utils.utils import Util
-from utils.utils import Hashing
-from utils.colors import Color
-from utils.savemanager import SaveManager
-from utils.crypto.hashes import Hashes
-from datetime import datetime
+from dbConnector import DbConnector
 import i18n.locale as locale
-from base64 import b64encode, b64decode
+from lib.save_manager import SaveManager
+from lib.crypto.hashes import Hashes
+from model.result import Result, QueryResult, QueryType
+from utils.ansiprint import AnsiPrint
+from utils.colors import Color
 
-class QueryType(Enum):
-    NONE = 0
-    TABLES = 1
-    COLUMNS = 2
-    VALUES = 3
-    ALL = 4
 
 class DataManager:
     def __init__(self) -> None:
         self._results = []
         self._export_manager = SaveManager()
         self._cursor = None
-
+        
     def _validate_arguments(self) -> bool:
         result = True
         if DatabaseSetting().database_name is None:
@@ -49,9 +39,26 @@ class DataManager:
             criterial.append(value)
             
         return criterial
+    
+    def _save_results(self, value:str, criterial:QueryType, results:list[Result]) -> bool:
+        if results.length > 0:
+            values = [info for info in self._results if info.criterial == criterial and info.value == value]
+            if len(values) == 0:
+                self._results.append(QueryResult(criterial=criterial, results=results, value = value))
+            else:
+                values[0].append(results)
 
-    def _filter_by_value(self, value_to_find):
-        results_list = []
+            return True
+        else:
+            return False
+    
+    def _filter_tables(self, table_name) -> list[Result]:
+        return self._cursor.search_tables(table_name if table_name != '*' else None )
+    
+    def _filter_columns(self, column_name)-> list[Result]:
+        return self._cursor.search_columns(column_name)
+
+    def _filter_by_value(self, value_to_find)-> None:
         queries=[]
         values = []
 
@@ -67,9 +74,9 @@ class DataManager:
             if results.length > 0:
                 total+=results.length
                 results.table_name = qry.tablename
-                results_list.append(results)
                 found = True
-                self._results.append(results)
+                #self._results.append(results)
+                self._save_results(qry.tablename, QueryType.VALUES, results)
                 AnsiPrint.print(f"Table Name: [bold][chartreuse_1]{qry.tablename}[reset]")
                 AnsiPrint.printResult(results)
 
@@ -79,7 +86,7 @@ class DataManager:
             AnsiPrint.print(locale.get("summary"))
             AnsiPrint.print(locale.get("summary_total").format(length=total))
         
-        return results_list
+        return None
     
     def _get_hashes(self, hash_type:str, text):
         return Hashes.get_hash_value(text.strip(), hash_type)
@@ -92,16 +99,10 @@ class DataManager:
         file_format = ResultSetting().format if format is None else format
         if file_format in Settings.valid_format_files:
             csv_delimiter = ResultSetting().csv_delimiter
-            current_date = datetime.now()
-            format_date = current_date.strftime("%Y%m%d%H%M%S")
-            for item in self._results:
-                content = self._export_manager.convert_content_to_plain(item, file_format, csv_delimiter)
-                file_name = f"{item.table_name if item.table_name is not None else ''}_{format_date}.{file_format}"
-                saved = self._export_manager.save(content, format, file_name)
-                AnsiPrint.print_locale("saved_results", saved=saved)
             
-            self._save_files()
-
+            file = self._export_manager.convert_content_to_plain(self._results, file_format, csv_delimiter)
+            AnsiPrint.print_locale("saved_results", saved=file)
+    
     
     def export(self, format:str=None):
         if len(self._results) > 0:
@@ -150,15 +151,16 @@ class DataManager:
                     value=','.join(hashes)
 
                 if option == QueryType.TABLES:
-                    results = self._cursor.search_tables(value)
+                    results = self._filter_tables(value) #self._cursor.search_tables(value)
                 elif option == QueryType.COLUMNS:
-                    results = self._cursor.search_columns(value)
+                    results = self._filter_columns(value)
                 elif option == QueryType.VALUES:
                     results = self._filter_by_value(value)
                 
                 if results is not None and option != QueryType.VALUES:
-                    if results.length>0:
-                        self._results.append(results)
+                    criterial = "Tables" if option == QueryType.TABLES else "Columns"
+
+                    if self._save_results(criterial, option, results):
                         AnsiPrint.printResult(results)
                         AnsiPrint.print(locale.get("summary"))
                         AnsiPrint.print(locale.get("summary_total").format(length=results.length))
@@ -168,4 +170,5 @@ class DataManager:
 
         except Exception as e:
             AnsiPrint.print_error(e)
+
         return results

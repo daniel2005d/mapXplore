@@ -257,8 +257,14 @@ class PostgreSQL(DataBase):
 
     def search_tables(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
         result = Result(headers=['tables'])
-        sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
-        tables = self._select(f"Select table_name from information_schema.tables where (table_name ilike {sentence}) and table_schema='public'")
+        tables = None
+        select = "Select table_name from information_schema.tables"
+        if filter:
+            sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
+            select+= " where (table_name ilike {sentence}) and table_schema='public'"
+
+        tables = self._select(select)
+        
         if tables:
             for table in tables:
                 result.rows.append(table)

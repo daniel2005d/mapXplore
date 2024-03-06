@@ -6,7 +6,7 @@ from config.settings import Settings
 from config.settings import ResultSetting
 from middle.data_operation import DataManager, QueryType
 from console.modules.argumentsManager import ArgumentsManager
-from utils.crypto.hashes import Hashes
+from lib.crypto.hashes import Hashes
 import i18n.locale as locale
 
 @with_default_category('Query Category')
@@ -20,6 +20,13 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         self._config = ResultSetting()
         self._core = DataManager()
         self._results = []
+        if hasattr(cmd2.Cmd,'do_set'):
+            delattr(cmd2.Cmd, 'do_set')
+        
+        if hasattr(cmd2.Cmd,'do_shortcuts'):
+            delattr(cmd2.Cmd, 'do_shortcuts')
+        if hasattr(cmd2.Cmd,'do_shell'):
+            delattr(cmd2.Cmd, 'do_shell')
 
     def complete_search(self, text, line, begidx, endidx):
         completions = []
@@ -63,5 +70,5 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         if value is not None:
             results = self._core.run(query_option, value, hash_type)
             if results:
-                self._results.append(results)        
-               
+                self._results.append(results)
+  

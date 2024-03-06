@@ -1,12 +1,11 @@
-from utils.ansiprint import AnsiPrint
 import cmd2
 from cmd2 import Cmd2ArgumentParser, with_argparser
 from config.settings import Settings
 from console.modules.configCommand import ConfigCommandSet
 from console.modules.queryCommand import QueryCommandSet
 from console.modules.importCommand import ImportCommand
-from middle.data_operation import DataManager
 import i18n.locale  as locale
+from middle.data_operation import DataManager
 
 
 
@@ -17,7 +16,6 @@ class MainConsole(cmd2.Cmd):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs, allow_cli_args=False, auto_load_commands=False)
         self._default_prompt = 'mapXplore # '
-        self._sqlmap = Settings.setting["sqlmap"]
         self.prompt = self._default_prompt
         self.register_postcmd_hook(self._postcmd)
         self.debug=True

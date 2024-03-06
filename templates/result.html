@@ -32,7 +32,12 @@
             
                             {%for value in row%}
                             <td style="word-wrap:break-word">
-                                {{value}}
+                                {%if value.startswith('/9j/') or value.startswith('iVBORw')%}
+                                    <img src="data:image/jpeg;base64,{{value}}" style="width: 250;" >
+                                {%else%}
+                                    {{value}}
+                                {%endif%}
+                                
                             </td>
             
                             {%endfor%}

@@ -3,7 +3,7 @@ from model.filecontent import FileContent
 from config.settings import SqlMapSetting, Settings
 from utils.utils import Hashing
 from utils.utils import Util
-from utils.file_reader  import FileReader
+from lib.file_reader  import FileReader
 import os
 import sys
 
@@ -36,7 +36,7 @@ class FileManager:
                         
                         file = reader.get_from_base64(value)
                         if file.content is not None:
-                            value = f"[cyan]{file.content})({file.extension})[{file.filename}][reset]"
+                            value = file.content 
                             row.append(value)
                         else:
                             row.append(Util.decode(value))

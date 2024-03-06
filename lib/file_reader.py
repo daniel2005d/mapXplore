@@ -1,17 +1,18 @@
-import zipfile
-import io
 import os
+from io import BytesIO
+import io
+import zipfile
 import magic
-import xml.etree.ElementTree as ET
-from base64 import b64decode
-from model.base64convert import Base64File
 from PyPDF2 import PdfReader
 from openpyxl import load_workbook
-from io import BytesIO
+from base64 import b64decode
+import xml.etree.ElementTree as ET
+from config.settings import ResultSetting
+from model.base64convert import Base64File
 from utils.utils import Util
 from utils.ansiprint import AnsiPrint
-from utils.savemanager import SaveManager
-from config.settings import ResultSetting
+from lib.save_manager import SaveManager
+
 
 
 class FileReader:
@@ -72,6 +73,15 @@ class FileReader:
         
         return text
     
+    def _read_ppt(self, zip_file):
+        text=""
+        with zip_file.open('ppt/presentation.xml') as xml:
+            tree = ET.parse(xml)
+            root = tree.getroot()
+            for child in root:
+                text+=child.tag
+        return text
+    
     def _get_extension(self, mime_type:str)->str:
         fragments = mime_type.split('/')
         return fragments[1], fragments[0]
@@ -101,7 +111,7 @@ class FileReader:
                                 document_type = 'xlsx'
                                 text = self._read_excel(content)
                         elif 'ppt/presentation.xml' in zip_file.namelist():
-                                return 'pptx'
+                                return self._read_ppt(zip_file)
         
         return document_type, text
     

@@ -21,7 +21,7 @@ class ImportCommand(CommandSet):
     
     
     def do_run(self, arg):
-        if Settings.setting["sqlmap"]["input"] is None:
+        if SqlMapSetting().file_input is None:
             AnsiPrint.print_error("You must specify the directory where the data downloaded by sqlmap is located.")
         else:
             self._core.start()

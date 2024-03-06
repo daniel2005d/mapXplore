@@ -1,5 +1,5 @@
 from typing import List
-from utils.crypto.hashes import Hashes
+from lib.crypto.hashes import Hashes
 from utils.utils import Util
 from middle.mapexception import MapXploreException
 import i18n.locale as locale
@@ -112,6 +112,7 @@ class BaseSetting:
     def key_name(self):
         return self.__setting_key__
 
+    
 class ResultSetting(BaseSetting):
 
     __setting_key__ = "Results"

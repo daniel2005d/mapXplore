@@ -2,8 +2,8 @@ from dbConnector import DbConnector
 from config.settings import SqlMapSetting, DatabaseSetting
 from config.settings import Settings
 from utils.ansiprint import AnsiPrint
-from utils.stopwatch import Stopwatch
-from middle.filemanager import FileManager
+from lib.stopwatch import Stopwatch
+from lib.file_manager import FileManager
 from model.result import Result
 import i18n.locale as locale
 import os

@@ -1,10 +1,12 @@
-from db import DataBase
-import sqlite3
-from utils.savemanager import SaveManager
-from config.settings import ResultSetting
-from model.query import Query
-from typing import List
 import os
+import sqlite3
+from typing import List
+from db import DataBase
+from config.settings import ResultSetting
+from lib.save_manager import SaveManager
+from model.query import Query
+from model.result import Result
+
 
 
 class SQLite(DataBase):
@@ -84,6 +86,7 @@ class SQLite(DataBase):
     def _check_exists(self, table_name, column_name, value)->bool:
             result = self._select(f"Select * from {table_name} where {column_name}=? LIMIT 1", (value,))
             return len(result)>0
+    
     def execute_query(self, query:str):
         return self._select(query, showColumns=True)
 
@@ -104,6 +107,29 @@ class SQLite(DataBase):
     def get_tables(self):
         tables = self._select("Select name from sqlite_master where type='table'")
         return tables
+    
+    def search_tables(self, filter:str=None):
+        result = Result(headers=['tables'])
+        if filter:
+            tables = self._select(f"SELECT name FROM sqlite_master WHERE type='table' AND name like '%{filter}%'")
+        else:
+            tables = self.get_tables()
+        if tables:
+            for table in tables:
+                result.rows.append(table)
+        
+        return result
+
+    def search_columns(self, filter:str) -> Result:
+        result = Result(headers=['table_name','column_name'])
+        tables = self.get_tables()
+        for tbl in tables:
+            table_name = tbl[0]
+            columns = self._get_columns(table_name)
+            column_names = [info for info in columns if filter in info]
+            for col in column_names:
+                result.rows.append([table_name,col])
+        return result
 
     def get_tables_and_columns(self):
         tables = self.get_tables()
