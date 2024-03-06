@@ -106,3 +106,5 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
                 AnsiPrint.print_info(section)
                 AnsiPrint.print('')
                 AnsiPrint.printSetting(section)
+            
+            AnsiPrint.print("\n")

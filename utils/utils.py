@@ -4,11 +4,8 @@ from base64 import b64decode
 import magic
 import mimetypes
 import os
-from utils.filemanager import FileManager
 
 class Util:
-
-    
 
     @staticmethod
     def check_file(file_name:str)->bool:
@@ -19,8 +16,8 @@ class Util:
     
     @staticmethod
     def is_readable(content:bytes)->bool:
-        allowed_bytes = set(range(32, 127)) | {10,13}
-        allowed_bytes |= set(range(192, 256)) # Add Latin chars
+        allowed_bytes = set(range(32, 127)) | {10,13} | {241,243,250}
+        
         for byte in content:
             if byte not in allowed_bytes:
                 return False
@@ -28,9 +25,8 @@ class Util:
     
     def get_readable_content(content:bytes)->str:
         text = ""
-        allowed_bytes = set(range(32, 127)) | {10,13}
-        allowed_bytes |= set(range(192, 238))
-        allowed_bytes |= set(range(240, 256)) # Add Latin chars
+        allowed_bytes = set(range(32, 127)) | {10,13} | {241,243,250}
+        
         for byte in content:
             if byte not in allowed_bytes:
                 text+=" "
@@ -39,48 +35,6 @@ class Util:
         
         return text
 
-    @staticmethod
-    def is_base64(text)->tuple[bytes,str]:
-        text_type = None
-        content = None
-        file_manager = FileManager()
-        try:
-            if text.isdigit():
-                return None, None
-            else:
-                try:
-                    content_bytes = b64decode(text)
-                    text_type = magic.from_buffer(content_bytes, mime=True)
-                    if text_type == 'text/plain':
-                        text_type = 'txt'
-                        if text[-2:] == '==':
-                            content = Util.get_readable_content(content_bytes)
-                        elif Util.is_readable(content_bytes):
-                            content = content_bytes.decode('latin')
-                        else:
-                            return None,None
-                    elif text_type == 'text/xml':
-                        text_type = 'xml'
-                        content = Util.get_readable_content(content_bytes)
-                    elif text_type == 'application/pdf':
-                        text_type = 'pdf'
-                        content = file_manager.read_pdf(content_bytes)
-                    elif text_type == 'application/octet-stream':
-                        return None, None
-                except UnicodeDecodeError as ue:
-                    return content, text_type
-                
-                if content is None:
-                    return file_manager.get_file_type(text)
-                # elif not Util.is_readable(content):
-                #     content = Util.get_readable_content(content_bytes)
-                
-                return content, text_type
-
-        except Exception as e:
-            return content, text_type
-            
-        
 
     @staticmethod
     def try_convert_b64(text)->tuple[bytes,str]:
@@ -105,6 +59,8 @@ class Util:
     def decode(text:str)->str:
         decoded = text
         try:
+            if text is None:
+                return None
             if not text.isdigit():
                 decoded = text.encode('latin').decode('unicode_escape')
         except:
@@ -114,8 +70,11 @@ class Util:
 
 class Hashing:
     @staticmethod
-    def get_md5(text: str):
-        return hashlib.md5(text.encode()).hexdigest()
+    def get_md5(text)->str:
+        if isinstance(text, bytes):
+            return hashlib.md5(text).hexdigest()
+        else:
+            return hashlib.md5(text.encode()).hexdigest()
 
 class CastDB:
     def cast_column(column_name, data_type):

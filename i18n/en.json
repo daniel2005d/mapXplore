@@ -17,7 +17,8 @@
         "filestitle":"[green]Processed Files[reset]",
         "totaltitle":"Imported Rows",
         "summary_table_titles":["Type", "Name"],
-        "total_time_title":"Elapsed time: "
+        "total_time_title":"Elapsed time: ",
+        "reading_file":"[cyan]Reading [bold]{filename}[reset] [cyan]file[reset]"
     },
     "config":{
             "saved":"The [bold]{filename}[reset] file was saved successfully",

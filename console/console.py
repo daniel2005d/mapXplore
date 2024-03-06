@@ -5,7 +5,7 @@ from config.settings import Settings
 from console.modules.configCommand import ConfigCommandSet
 from console.modules.queryCommand import QueryCommandSet
 from console.modules.importCommand import ImportCommand
-from middle.running import Running
+from middle.data_operation import DataManager
 import i18n.locale  as locale
 
 
@@ -22,11 +22,10 @@ class MainConsole(cmd2.Cmd):
         self.register_postcmd_hook(self._postcmd)
         self.debug=True
         self._results = []
-        self._core = Running()
+        self._core = DataManager()
         self._filter_options = Settings.filter_options
         self._args = args
         self._commands = []
-    
 
     use_parser = Cmd2ArgumentParser(add_help=locale.get("help_import"))
     
@@ -41,7 +40,6 @@ class MainConsole(cmd2.Cmd):
     import_parser.add_argument('--input',help="Path of the site extracted from sqlmap (before /dump)")
     import_parser.add_argument('--delimiter', help="sqlmap Output File Delimiter")
     import_parser.add_argument('--dbms', choices=['postgres','sqlite'], help="Set DBMS to import data")
-    import_parser.add_argument('--recreate', help="Set if destroy previous databases instance", action='store_true')
     
 
     def _load_module(self, arg=None) -> None:

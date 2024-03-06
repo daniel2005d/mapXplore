@@ -15,7 +15,6 @@ class DbConnector:
 
         self._delimiter = arguments.delimiter if hasattr(arguments, "delimiter") else ","
         self._table= arguments.table if hasattr(arguments, "table") else None
-        self._recreate = arguments.recreate if hasattr(arguments, "recreate")   else False
         self._database = arguments.database if hasattr(arguments, "database")   else None
         self._host = arguments.host
         self._username = arguments.username

@@ -27,11 +27,7 @@ class Settings:
     filter_options = ['tables','columns','values','all']
     allow_hashes = Hashes.get_available_algorithms()
     setting = {
-        "Query":{
-            "operator":"ilike",
-            "logical_operator":"or"
-            
-        },
+        
         "General":{
             "debug":False
         },
@@ -40,12 +36,10 @@ class Settings:
             "username":"",
             "password":"",
             "database":"",
-            "dbms":"postgres",
-            "recreate":False
+            "dbms":"postgres"
         },
         "Results":{
             "output":"",
-            "savefiles":False,
             "format":'csv',
             "csvdelimiter":","
         },
@@ -109,6 +103,14 @@ class BaseSetting:
     def _get_bool(self, key)->bool:
         value = self._get_value(key)
         return value if value is not None else False
+    
+    @property
+    def keys(self):
+        return Settings.setting[self.__setting_key__].keys()
+    
+    @property
+    def key_name(self):
+        return self.__setting_key__
 
 class ResultSetting(BaseSetting):
 
@@ -121,10 +123,6 @@ class ResultSetting(BaseSetting):
     @output.setter
     def output(self, value)->str:
         Settings.setting[self.__setting_key__]["output"]=value
-    
-    @property
-    def save_files(self)->bool:
-        return self._get_bool("savefiles")
     
     @property
     def format(self)->str:

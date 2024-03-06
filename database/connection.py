@@ -10,5 +10,4 @@ class Connection:
     database=""
     delimiter=""
     table=""
-    recreate=False
     dbms=""

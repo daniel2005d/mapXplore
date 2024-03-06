@@ -173,8 +173,7 @@ class PostgreSQL(DataBase):
     If database exists, drop and create
     """
     def create_database(self, dbname:str):
-        if self._recreate:
-          self._execute(f'DROP DATABASE IF EXISTS {dbname.lower()}')
+        self._execute(f'DROP DATABASE IF EXISTS {dbname.lower()}')
 
         dbexists = self._check_exists_db(dbname)
         if not dbexists:

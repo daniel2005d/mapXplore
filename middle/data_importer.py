@@ -9,7 +9,7 @@ import i18n.locale as locale
 import os
 
 
-class Import():
+class DataImporter():
     def __init__(self) -> None:
         self._summary = None
         self._db = None
@@ -62,7 +62,45 @@ class Import():
             summary.rows.append([locale.get("import.total_time_title"), self._summary["elapsed"]])
 
             AnsiPrint.printResult(summary)
-    
+
+    def create_tables(self, database:str, directory:str):
+        
+        files = []
+        for name in os.listdir(directory):
+            if not name.startswith("."):
+                if os.path.isfile(os.path.join(directory, name)):
+                    files.append(name)
+
+        for file in files:
+            try:
+                self._summary["files"].append(file)
+                file_path = os.path.join(directory, file)
+                self.insert_data(database,file_path)
+            except Exception as e:
+                txt = f"Error into {file} => {str(e)}"
+                AnsiPrint.print_error(txt)
+
+    def insert_data(self, database:str, path:str):
+        csv = FileManager()
+        db = self._get_connection(database)
+        file = os.path.basename(path)
+        index_ext = file.index('.')
+        file_name = file[:index_ext].lower()
+        ### Get Dat file structure and information
+        AnsiPrint.print_locale("import.reading_file", end='', filename=file_name)
+        file_content = csv.get_structure(path)
+        ## Create Table and Columns
+        table_columns = file_content.headers
+        if file_name not in self._summary["tables"]:
+            self._summary["tables"].append(file_name)
+        """Create tables
+        """
+        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)-1}]", end='')
+        db.create_table(file_name, table_columns)
+        db.insert_many(file_name,file_content.rows, table_columns)
+        self._summary["rows"]+=len(file_content.rows)
+        AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]")
+
     def start(self):
         try:
             stopwatch = Stopwatch()
@@ -105,39 +143,3 @@ class Import():
             self._print_summary()
         except Exception as e:
             AnsiPrint.print_error(e)
-
-    def create_tables(self, database:str, directory:str):
-        
-        files = []
-        for name in os.listdir(directory):
-            if not name.startswith("."):
-                if os.path.isfile(os.path.join(directory, name)):
-                    files.append(name)
-
-        for file in files:
-            try:
-                self._summary["files"].append(file)
-                file_path = os.path.join(directory, file)
-                self.insert_data(database,file_path)
-            except Exception as e:
-                txt = f"Error into {file} => {str(e)}"
-                AnsiPrint.print_error(txt)
-
-    def insert_data(self, database:str, path:str):
-        csv = FileManager()
-        db = self._get_connection(database)
-        file = os.path.basename(path)
-        index_ext = file.index('.')
-        file_name = file[:index_ext].lower()
-        file_content = csv.get_structure(path)
-        ## Create Table and Columns
-        table_columns = file_content.headers
-        if file_name not in self._summary["tables"]:
-            self._summary["tables"].append(file_name)
-        """Create tables
-        """
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)-1}]", end='')
-        db.create_table(file_name, table_columns)
-        db.insert_many(file_name,file_content.rows, table_columns)
-        self._summary["rows"]+=len(file_content.rows)
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]")

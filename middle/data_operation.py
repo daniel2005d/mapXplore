@@ -20,13 +20,12 @@ class QueryType(Enum):
     VALUES = 3
     ALL = 4
 
-class Running:
+class DataManager:
     def __init__(self) -> None:
         self._results = []
         self._export_manager = SaveManager()
         self._cursor = None
-        self._files = []
-    
+
     def _validate_arguments(self) -> bool:
         result = True
         if DatabaseSetting().database_name is None:
@@ -63,9 +62,8 @@ class Running:
         found = False
         total = 0
         for qry in queries:
-            AnsiPrint.print(f"[cyan]{qry.tablename}[reset]", end='')
+            AnsiPrint.print(' '*(len(qry.tablename)*10),end='\r')
             results = self.run_query(qry.sentence, qry.word)
-            AnsiPrint.print(''*(len(qry.tablename)*5),end='\r')
             if results.length > 0:
                 total+=results.length
                 results.table_name = qry.tablename
@@ -88,7 +86,6 @@ class Running:
     
     def _save(self, format:str=None)->None:
         """Save results to setting format
-
         Args:
             format (str, optional): HTML or CSV. Defaults to None.
         """
@@ -104,55 +101,7 @@ class Running:
                 AnsiPrint.print_locale("saved_results", saved=saved)
             
             self._save_files()
-        
 
-    def _save_files(self) -> None:
-        save = SaveManager()
-        for item in self._files:
-            content = item["content"]
-            format = item["format"]
-            text = item["text"]
-            if format in ['docx','xlsx','ppt','pdf']:
-                path = save.save(b64decode(text), format)
-            else:
-                path = save.save(content, format)
-
-            AnsiPrint.print_locale("savefiles", key=path)
-        
-        self._files.clear()
-    
-    
-    def _format_b64_data(self, text:str, value_to_hight_light:str, file_name:str):
-        """Try to convert text from base64 to plain text
-        if savefiles settings its true this file will be save
-        Args:
-            text (str): Base64 text
-            value_to_hight_light (str): Text to hight light
-            file_name (str): File name to save
-
-        Returns:
-            _type_: _description_
-        """
-        data,format = Util.is_base64(text)
-        if data is not None: # Is Base64 
-            
-            if format.lower() != 'txt':
-                column_formatted = Color.format(f"{data}[cyan][{format if format is not None else 'Truncated... [red][{format}]'}][reset]")
-            else:
-                text_format = format if format is not None else "fromBase64"
-                column_formatted, _ =  Color.highlight_text(data+f"[cyan][{text_format}][reset]", value_to_hight_light)
-        else:
-            if format is not None:
-                column_formatted, _ =  Color.highlight_text(text if format == 'bin' else text[:100]+f"[cyan]{format}[reset]" , value_to_hight_light)
-            else:
-                column_formatted, _ =  Color.highlight_text(text, value_to_hight_light)
-        
-        if data is not None and format is not None:
-            if {"content":data, "format":format, "text":text} not in self._files:
-                self._files.append({"content":data, "format":format, "text":text})
-            
-
-        return column_formatted
     
     def export(self, format:str=None):
         if len(self._results) > 0:
@@ -179,7 +128,7 @@ class Running:
                 formatted_columns = []
                 for key in row:
                     column_value = str(row[key])
-                    column_formatted = self._format_b64_data(column_value, value_to_hight_light, key)
+                    column_formatted,_ = Color.highlight_text(column_value, value_to_hight_light) #self._format_b64_data(column_value, value_to_hight_light, key)
                     formatted_columns.append(column_formatted)
                     columns.append(column_value)
 

@@ -1,9 +1,10 @@
 import cmd2
 from cmd2 import CommandSet, with_default_category
-from cmd2 import Cmd2ArgumentParser, with_argparser
+from cmd2 import with_argparser
 from utils.ansiprint import AnsiPrint
 from config.settings import Settings
-from middle.running import Running, QueryType
+from config.settings import ResultSetting
+from middle.data_operation import DataManager, QueryType
 from console.modules.argumentsManager import ArgumentsManager
 from utils.crypto.hashes import Hashes
 import i18n.locale as locale
@@ -16,8 +17,8 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
             if args.config:
                 Settings.load_settings(args.config)
         self._filter_options = Settings.filter_options
-        self._result_options = Settings.setting["Results"]
-        self._core = Running()
+        self._config = ResultSetting()
+        self._core = DataManager()
         self._results = []
 
     def complete_search(self, text, line, begidx, endidx):
@@ -34,7 +35,7 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         return completions
     
     def do_save(self, arg):
-        format = arg.args if arg.args != '' else self._result_options["format"]
+        format = arg.args if arg.args != '' else self._config.format
         if format in Settings.valid_format_files:
             self._core.export(format)
         else:

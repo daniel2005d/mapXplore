@@ -1,16 +1,14 @@
 from config.settings import Settings
 from config.settings import ResultSetting
 import os
-from datetime import datetime
 from model.result import Result
 from jinja2 import Environment, FileSystemLoader
-import base64
+from utils.utils import Hashing
 
 class SaveManager:
     def __init__(self) -> None:
         self._results = ResultSetting() #Settings.setting["Results"]
         self._output = self._results.output
-        self._savefiles = self._results.save_files
         self._format = self._results.format
         self._delimiter = self._results.csv_delimiter
         if self._output is None:
@@ -31,14 +29,18 @@ class SaveManager:
             with(open(name,'w')) as fb:
                 fb.write(content)
 
-    def save(self, content, format, name=None) -> str:
-        self._create_directory(self._output)
+    def save(self, content, format, name=None, directory:str=None) -> str:
+        output_directory = directory if directory is not None else self._output
+        self._create_directory(output_directory)
         if name is None:
-            current_date = datetime.now()
-            format_date = current_date.strftime("%Y%m%d%H%M%S")
-            name = f"{format_date}.{format}"
+            
+            #current_date = datetime.now()
+            #format_date = current_date.strftime("%Y%m%d%H%M%S")
+            name = Hashing.get_md5(content)
+            if format is not None:
+                name+=f".{format}"
         
-        path = os.path.join(self._output, name)
+        path = os.path.join(output_directory, name)
 
         self._write_content(content, path)
         return path

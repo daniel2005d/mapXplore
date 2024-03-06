@@ -1,6 +1,7 @@
 from db import DataBase
 import sqlite3
 from utils.savemanager import SaveManager
+from config.settings import ResultSetting
 from model.query import Query
 from typing import List
 import os
@@ -14,8 +15,7 @@ class SQLite(DataBase):
 
     def _get_db_file(self):
         manager = SaveManager()
-        home = os.path.expanduser("~")
-        path = os.path.join(home,'.local','share','mapXplore')
+        path = os.path.join(ResultSetting().output, "db")
         manager._create_directory(path)
         return path
     
@@ -88,11 +88,11 @@ class SQLite(DataBase):
         return self._select(query, showColumns=True)
 
     def create_database(self, dbname:str):
-        if self._recreate:
-            path_db = self._get_db_file()
-            db_file = os.path.join(path_db, dbname+".db")
-            if os.path.exists(db_file):
-                os.remove(db_file)
+        
+        path_db = self._get_db_file()
+        db_file = os.path.join(path_db, dbname+".db")
+        if os.path.exists(db_file):
+            os.remove(db_file)
         self._get_cursor(dbname)
         self._conn.close()
     

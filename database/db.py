@@ -12,21 +12,12 @@ class DataBase:
             self._database = dbname
             self._status_handler = None
             self._hashcolumn = Settings.checksum_column
-            self._recreate = Settings.setting["Database"]["recreate"]
             self._tables = []
     
     @property
     def principal_database(self)->str:
         pass
     
-    @property
-    def recreate(self) -> bool:
-        return self._recreate
-    
-    @recreate.setter
-    def recreate(self, value:bool):
-        Settings.setting["Database"]["recreate"]=value
-
     @property
     def status_handler(self):
         return self._status_handler

@@ -1,9 +1,10 @@
+import sys
+import shutil
 from model.result import Result
 from utils.colors import Color
-import shutil
 from cmd2 import ansi, EightBitBg, RgbFg
 from config.settings import Settings
-import sys
+from config.settings import GeneralSetting
 import i18n.locale as locale
 
 from typing import (
@@ -78,14 +79,23 @@ class AnsiPrint:
     @staticmethod
     def print_error(text:str)->None:
         AnsiPrint.print(f"[red][-][bold] {text}[reset]")
-        if Settings.setting["General"]["debug"]:
-            exc_type, exc_value, exc_traceback = sys.exc_info()
-            if exc_traceback:
-                AnsiPrint.print_debug(f"{str(exc_value)} {str(exc_traceback.tb_frame)}")
+        AnsiPrint.print_debug()
+            
 
     @staticmethod
-    def print_debug(message):
-        AnsiPrint.print(f"[bold][yellow][debug][reset] [yellow]{message} [reset]")
+    def print_debug(exception:Exception=None):
+        if GeneralSetting().isDebug:
+            message = ""
+            if exception is None:
+                import traceback
+                traceback.print_exc()
+                # exc_type, exc_value, exc_traceback = sys.exc_info()
+                # if exc_traceback:
+                #     message = f"{exc_value} {exc_traceback}"
+            else:
+                message = str(exception)
+                AnsiPrint.print(f"[bold][yellow][debug][reset] [yellow]{message} [reset]")
+            
 
 
     @staticmethod
@@ -93,9 +103,9 @@ class AnsiPrint:
         AnsiPrint.print(f"[green][+][bold] {text}[reset]")
     
     @staticmethod
-    def print_locale(sectionkey:str, **kwargs)->None:
+    def print_locale(sectionkey:str,end='\r\n', **kwargs)->None:
         text = locale.get(sectionkey)
-        AnsiPrint.print(text.format(**kwargs))
+        AnsiPrint.print(text.format(**kwargs), end=end)
 
     
     
