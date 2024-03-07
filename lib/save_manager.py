@@ -44,7 +44,7 @@ class SaveManager:
     
     def convert_content_to_plain(self, items:QueryResult)->str:
         
-        self._output_dir = ResultSetting().get_folder_output()
+        self._output_dir = ResultSetting().get_folder_output(ResultSetting().format)
         if not ResultSetting().isHtml:
             return self.convert_to_csv(items)
         else:

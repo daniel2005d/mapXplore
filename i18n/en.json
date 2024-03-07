@@ -23,7 +23,9 @@
     "config":{
             "saved":"The [bold]{filename}[reset] file was saved successfully",
             "loaded":"The [bold]{filename}[reset] file was loaded successfully",
-            "overwrite_file":"[bold]Dou you want overwrite file?[reset] [Y/n]"
+            "overwrite_file":"[bold]Dou you want overwrite file?[reset] [Y/n]",
+            "table_key_title":"Key Name",
+            "table_value_title":"Current Setting"
     },
     "help":{
         "query":"from cmd2 import Cmd2ArgumentParser, with_argparser",

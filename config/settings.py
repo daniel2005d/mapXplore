@@ -43,7 +43,7 @@ class Settings:
         },
         "Results":{
             "output":"",
-            "format":'xls'
+            "format":'xlsx'
             
         },
         "sqlmap":{
@@ -64,7 +64,15 @@ class Settings:
 
     @staticmethod
     def set_value(section, key, value):
-        Settings.setting[section][key]=value
+        if section in Settings.setting:
+            if key in Settings.setting[section]:
+                Settings.setting[section][key]=value
+            else:
+                message = locale.get("errors.section_config_error")
+                raise MapXploreException(message=message.format(section=section))
+        else:
+            message = locale.get("errors.section_config_error")
+            raise MapXploreException(message=message.format(section=section))
     
     @staticmethod
     def save_settings(filename:str, override=False)->None:

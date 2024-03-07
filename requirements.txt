@@ -5,4 +5,3 @@ openpyxl==3.1.2
 psycopg2_binary==2.9.9
 PyPDF2==3.0.1
 python_magic==0.4.27
-SQLAlchemy==2.0.23

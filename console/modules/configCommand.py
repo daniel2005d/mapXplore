@@ -85,8 +85,6 @@ class ConfigCommandSet(CommandSet, ArgumentsManager):
             if args.command == 'unset':
                 Settings.set_value(section, option, None)
             elif args.command == 'set':
-                
-
                 if section if self._section != section else option in self._config:
                     Settings.set_value(section, option, value)
                 else:

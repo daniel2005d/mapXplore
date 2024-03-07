@@ -1,41 +1,47 @@
-<html>
-<title>
-    Index MapXplore
-</title>
 
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Table of Contents</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding-top: 70px;
+    }
+  </style>
 </head>
+<body data-spy="scroll" data-target="#navbar-example2" data-offset="70">
+  
+  <nav id="navbar-example2" class="navbar navbar-light bg-light fixed-top">
+    <a class="navbar-brand" href="https://github.com/daniel2005d/mapXplore">mapXplore</a>
+    
+  </nav>
 
-<body>
-    <div class="">
-        <div class="row">
-            <div class="col-md-10">
-                <table class="table table-hover" style="table-layout: fixed;">
-                    <thead>
-                        <tr>
-                            Table Name
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {%for file in files%}
-                        <tr>
-                            <td>
-                                <a href="{{file['file']}}">
-                                    {{file['name']}}
-                                </a>
-                                
-                            </td>
-                        </tr>
-                        {%endfor%}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+  
+  <header class="container-fluid text-center bg-primary text-white py-5">
+    <img src="https://raw.githubusercontent.com/daniel2005d/mapXplore/main/doc/images/Logo.jpg?token=GHSAT0AAAAAACM7SBNN75TA6NU3MVO4QAG2ZPKILVQ" alt="Logo" style="width:250px" class="img-fluid rounded-circle mb-3">
+    <h1 class="display-4">Tables</h1>
+  </header>
+
+  
+  <main class="container">
+    {%for file in files%}
+    <section id="section1">
+        
+      <h2>
+        <a href="{{file['file']}}">{{file['name']}}</a>
+        </h2>
+      
+    </section>
+    {%endfor%}
+    
+  </main>
+
+  <!-- Bootstrap JS -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
-
-
-
 </html>

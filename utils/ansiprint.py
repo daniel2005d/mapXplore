@@ -24,22 +24,21 @@ class AnsiPrint:
 
     @staticmethod
     def printSetting(section:str):
+        
+        title_message = locale.get("config.table_key_title")
+        title_value = locale.get("config.table_value_title")
         columns: List[Column] = list()
         data_list: List[List[Any]] = list()
         option = Settings.setting[section]
+        max_title = max(len(text) for text in option)
+        max_value = max(max(len(str(option[text])) for text in option), len(title_value))
+
+        columns.append(Column(title_message, width=max_title))
+        columns.append(Column(title_value, width=max_value))
         
         for key in option:
-            columns.append(Column(ansi.style(key, bold=True,italic=True, bg=EightBitBg.GRAY_53), width=30))
-        
-        rows = []
-        for index, value in enumerate(option):
-            setting_value = option[value]
-            rows.append(setting_value)
-            columns[index].width = max(columns[index].width,len(str(setting_value)))
-        
-        data_list.append(rows)
+            data_list.append([key, option[key]])
 
-        
         st = SimpleTable(columns)
         table = st.generate_table(data_list)
         print(table)
