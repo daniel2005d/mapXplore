@@ -26,7 +26,7 @@ Sus principales caracteristicas son:
 ## Requrimientos
 * python-3.11
 
-```bash
+```
 git clone https://github.com/daniel2005d/mapXplore
 cd mapXplore
 pip install -r requirements
@@ -51,7 +51,8 @@ Es una aplicación que es modular, y consta de lo siguiente:
 
 ### Inicio
 > Permite cargar una configuración por defecto al inicio del programa
-```bash
+
+```
 python engine.py [--config config.json]
 ```
 <img src="../screenshot/start.png" >

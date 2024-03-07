@@ -16,13 +16,13 @@ Este modulo permite realizar las búsquedas por:
 * **set**: Establece la [configuración](configuration.md) de la section de Results.
 
 ### Buscar por tablas
-```json
+```
 mapXplore #> search tables users
 ```
 <img src="../screenshot/search_tables.png" >
 
 ### Buscar por columnas
-```json
+```
 mapXplore #> search columns user
 ```
 <img src="../screenshot/search_columns.png" >
@@ -30,13 +30,13 @@ mapXplore #> search columns user
 ### Buscar por palabras
 <img src="../screenshot/search_options.png" >
 
-```json
+```
 mapXplore #> search password
 mapXplore # search md5 password
 ```
 <img src="../screenshot/search_word.png" >
 
-```bash
+```
 mapXplore # search report
 ```
 
@@ -46,7 +46,7 @@ mapXplore # search report
 
 Permite guardar los resultados antes buscados en el formato que se defina en la configuración.
 
-```bash
+```
 mapXplore # save
 ```
 <img src="../screenshot/save.png">

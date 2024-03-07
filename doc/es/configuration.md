@@ -1,5 +1,5 @@
 # Configuración
-```json
+```
 setting = {
         
         "General":{
@@ -26,7 +26,7 @@ setting = {
 ```
 
 ## config
-```json
+```
 mapXplore #> use config [General|Database|Results|sqlmap]
 ```
 #### General
@@ -64,7 +64,7 @@ Esta sección de configuración es usada para leer los datos generados por sqlma
 * **save** configfile.json
 * **load** configfile.json
 
-```bash
+```
 mapXplore #> use config 
 mapXplore # config> show
 mapXplore # config> set Database|Results|General|sqlmap option value

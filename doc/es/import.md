@@ -2,7 +2,7 @@
 
 Importa los datos generados por **Sqlmap** según el dbms seleccionado.
 
-```json
+```
 mapXplore #> use import
 mapXplore # import> run
 ```
