@@ -58,6 +58,6 @@ python engine.py [--config config.json]
 
 ## Modulos
 
-- [config](doc/configuration_es.md)
-- [import](doc/import_es.md)
-- [principal|search](doc/main_es.md)
+- [config](configuration.md)
+- [import](import.md)
+- [principal|search](main.md)
