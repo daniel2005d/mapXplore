@@ -7,7 +7,7 @@ from PyPDF2 import PdfReader
 from openpyxl import load_workbook
 from base64 import b64decode
 import xml.etree.ElementTree as ET
-from config.settings import ResultSetting
+from config.settings import ResultSetting, DatabaseSetting
 from model.base64convert import Base64File
 from utils.utils import Util
 from utils.ansiprint import AnsiPrint
@@ -17,7 +17,7 @@ from lib.save_manager import SaveManager
 
 class FileReader:
     def __init__(self) -> None:
-        self._files_directory = ResultSetting().output
+        self._files_directory = ResultSetting().get_folder_output("files")
         self._invalid_b64_chars = '!"#$%&\'()*,-.:;<>?@[\\]^_`{|}~ '
         self._magic_numbers = {                                                                                                                                                                                                                      
             b"\x89\x50\x4E\x47\x0D\x0A\x1A\x0A": "png",
@@ -130,66 +130,70 @@ class FileReader:
     def _save_file(self, content,format:str)->str:
         if content:
            save = SaveManager()
-            
-           directory = os.path.join(self._files_directory, "files")
-           filepath = save.save(content, format if format is not None else "", None, directory)
+        
+           filepath = save.save(content, format if format is not None else "", None, self._files_directory)
            return filepath
         
         return None
     
     def _complete_padding(self, text)->str:
-        padding_needed = 4-(len(text)%4)
-        new_text = text+("="*padding_needed)
-        return new_text
+        current_length = len(text)%4
+        if current_length > 0:
+            padding_needed = 4-current_length
+            new_text = text+("="*padding_needed)
+            return new_text
+        else:
+            return text
     
     def get_from_base64(self, text:str) -> Base64File:
         file = Base64File()
         try:
-            if text.startswith("/9j/"):
-                text = self._complete_padding(text)
-            elif text.startswith("data:image/"):
-                text = text.split(",")[1]
+            if text:
+                if text.startswith("/9j/"):
+                    text = self._complete_padding(text)
+                elif text.startswith("data:image/"):
+                    text = text.split(",")[1]
 
-            content = None
-            content_bytes = None
-            valid, _ = self._is_base64_valid(text)
-            
-            if valid:
-                try:
-                    content_bytes = b64decode(text)
-                    text_type = magic.from_buffer(content_bytes, mime=True)
-                    ext, format = self._get_extension(text_type)
-                    if ext == 'plain':
-                        ext = 'txt'
-                        if text[-2:] == '==':
+                content = None
+                content_bytes = None
+                valid, _ = self._is_base64_valid(text)
+                
+                if valid:
+                    try:
+                        content_bytes = b64decode(text)
+                        text_type = magic.from_buffer(content_bytes, mime=True)
+                        ext, format = self._get_extension(text_type)
+                        if ext == 'plain':
+                            ext = 'txt'
+                            if text[-2:] == '==':
+                                content = Util.get_readable_content(content_bytes)
+                            elif Util.is_readable(content_bytes):
+                                content = content_bytes.decode('latin')
+                            else:
+                                return file
+                        elif ext == 'csv':
                             content = Util.get_readable_content(content_bytes)
-                        elif Util.is_readable(content_bytes):
-                            content = content_bytes.decode('latin')
-                        else:
+                        elif ext == 'xml':
+                            content = Util.get_readable_content(content_bytes)
+                        elif ext == 'pdf':
+                            content = self._read_pdf(content_bytes)
+                        elif format == 'image': # We cannot convert to readable format
+                            content = text
+                        elif ext == 'zip':
+                            content = self.get_zip_files(content_bytes)
+                        elif format == 'application' and 'office' not in ext:
                             return file
-                    elif ext == 'csv':
-                        content = Util.get_readable_content(content_bytes)
-                    elif ext == 'xml':
-                        content = Util.get_readable_content(content_bytes)
-                    elif ext == 'pdf':
-                        content = self._read_pdf(content_bytes)
-                    elif format == 'image': # We cannot convert to readable format
-                        content = text
-                    elif ext == 'zip':
-                        content = self.get_zip_files(content_bytes)
-                    elif format == 'application' and 'office' not in ext:
+                        
+                    except UnicodeDecodeError as ue:
                         return file
                     
-                except UnicodeDecodeError as ue:
-                    return file
-                
-                if content is None:
-                    ext, content = self.get_file_type(text)
-                
+                    if content is None:
+                        ext, content = self.get_file_type(text)
+                    
 
-                file.extension = ext
-                file.content = content
-                file.filename = self._save_file(content_bytes, ext)
+                    file.extension = ext
+                    file.content = content
+                    file.filename = self._save_file(content_bytes, ext)
         except Exception as e:
             AnsiPrint.print_debug(e)
         

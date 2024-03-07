@@ -1,13 +1,14 @@
 import cmd2
 from cmd2 import CommandSet, with_default_category
-from cmd2 import with_argparser
-from utils.ansiprint import AnsiPrint
+from cmd2 import Cmd2ArgumentParser,with_argparser
 from config.settings import Settings
 from config.settings import ResultSetting
-from middle.data_operation import DataManager, QueryType
 from console.modules.argumentsManager import ArgumentsManager
+from middle.data_operation import DataManager, QueryType
 from lib.crypto.hashes import Hashes
 import i18n.locale as locale
+from utils.ansiprint import AnsiPrint
+
 
 @with_default_category('Query Category')
 class QueryCommandSet(CommandSet, ArgumentsManager):
@@ -20,14 +21,28 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         self._config = ResultSetting()
         self._core = DataManager()
         self._results = []
-        if hasattr(cmd2.Cmd,'do_set'):
-            delattr(cmd2.Cmd, 'do_set')
-        
-        if hasattr(cmd2.Cmd,'do_shortcuts'):
-            delattr(cmd2.Cmd, 'do_shortcuts')
-        if hasattr(cmd2.Cmd,'do_shell'):
-            delattr(cmd2.Cmd, 'do_shell')
+        self._remove_default_commands()
 
+    parser = Cmd2ArgumentParser(add_help="")
+    subparser = parser.add_subparsers(dest='section')
+
+    format_parser = subparser.add_parser('format')
+    format_parser.add_argument('value', choices=Settings.valid_format_files)
+
+    output_parser = subparser.add_parser('output')
+    output_parser.add_argument('value')
+    
+    def _remove_default_commands(self):
+        for command in Settings.get_default_commands():
+            if hasattr(cmd2.Cmd, command):
+                delattr(cmd2.Cmd, command)
+
+
+    @with_argparser(parser)
+    def do_set(self, arg):
+        ResultSetting().set_value(arg.section,arg.value)
+        
+    
     def complete_search(self, text, line, begidx, endidx):
         completions = []
         hashes = list(Hashes.get_available_algorithms())
@@ -42,6 +57,8 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         return completions
     
     def do_save(self, arg):
+        """Stores the queries performed in HTML or CSV formats
+        """
         format = arg.args if arg.args != '' else self._config.format
         if format in Settings.valid_format_files:
             self._core.export(format)
@@ -50,6 +67,9 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
 
     
     def do_search(self, arg):
+        """
+        Facilitates searching for the imported information
+        """
         option = None
         value = None
         hash_type = None

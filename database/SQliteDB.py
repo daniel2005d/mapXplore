@@ -183,8 +183,7 @@ class SQLite(DataBase):
             columns.append(hash_column)
             columns_insert=''
             parameters = ''
-            if len(data)!=len(columns):
-                print("")
+            
             for index, c in enumerate(columns):
                 columns_insert+=f'"{c.lower()}"'
                 if index != len(columns)-1:

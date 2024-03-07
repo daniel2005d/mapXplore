@@ -18,7 +18,7 @@
         "totaltitle":"Imported Rows",
         "summary_table_titles":["Type", "Name"],
         "total_time_title":"Elapsed time: ",
-        "reading_file":"[cyan]Reading [bold]{filename}[reset] [cyan]file[reset]"
+        "reading_file":"\r[cyan]Reading [bold]{filename}[reset] [cyan]file[reset]"
     },
     "config":{
             "saved":"The [bold]{filename}[reset] file was saved successfully",
@@ -33,7 +33,8 @@
     "errors":{
         "file_exists":"The file exists",
         "file_not_exists":"{file} does not  exists",
-        "section_config_error":"The [bold]{section}[reset] setting does not exists"
+        "section_config_error":"The [bold]{section}[reset] setting does not exists",
+        "invalid_format":"The output format is invalid"
      
     }
 

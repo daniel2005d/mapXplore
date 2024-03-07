@@ -61,7 +61,7 @@ class DataManager:
     def _filter_by_value(self, value_to_find)-> None:
         queries=[]
         values = []
-
+        
         for value in self._get_values_to_find(value_to_find):
             values.append(value)
             queries += self._cursor.create_query_to_all_values(value)
@@ -69,8 +69,9 @@ class DataManager:
         found = False
         total = 0
         for qry in queries:
-            AnsiPrint.print(' '*(len(qry.tablename)*10),end='\r')
+            #AnsiPrint.print(' '*(len(qry.tablename)*10))
             results = self.run_query(qry.sentence, qry.word)
+            
             if results.length > 0:
                 total+=results.length
                 results.table_name = qry.tablename
@@ -98,11 +99,8 @@ class DataManager:
         """
         file_format = ResultSetting().format if format is None else format
         if file_format in Settings.valid_format_files:
-            csv_delimiter = ResultSetting().csv_delimiter
-            
-            file = self._export_manager.convert_content_to_plain(self._results, file_format, csv_delimiter)
+            file = self._export_manager.convert_content_to_plain(self._results)
             AnsiPrint.print_locale("saved_results", saved=file)
-    
     
     def export(self, format:str=None):
         if len(self._results) > 0:

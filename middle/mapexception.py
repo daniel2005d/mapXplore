@@ -9,9 +9,11 @@ class MapXploreException(Exception):
     def __str__(self) -> str:
         message = None
         if self._message is None:
-            message = locale.get("errors."+self._message_key)
+            if self._message_key:
+                message = locale.get("errors."+self._message_key)
         else:
             message = self._message
+            
         return message
 
     @property

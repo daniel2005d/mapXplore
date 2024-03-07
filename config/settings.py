@@ -1,28 +1,31 @@
+import os
+import json
 from typing import List
 from lib.crypto.hashes import Hashes
 from utils.utils import Util
 from middle.mapexception import MapXploreException
 import i18n.locale as locale
-import os
-import json
+
 
 
 class Settings:
-    def __init__(self) -> None:
-        pass
+    
+    COMMAND_PREFIX = "do_"
    
     special_column_names={
         "TypeTitle":"TypeFormat_{col_name}",
         "ContentTitle":"DataFromBase64_{col_name}"
-    },
+    }
 
-    principal_databases={
+    principal_databases:dict={
         'postgres':'postgres',
         'sqlite':None
     }
 
+    _default_commands = ['set','shortcuts','shell','alias','edit','macro','run_pyscript','run_script']
+
     checksum_column = 'sqlmap_hash'
-    valid_format_files = ['html','csv','json']
+    valid_format_files = ['html','xlsx','json']
     exclude_data_type: List[str] = ["boolean","timestamp without time zone","date","datetime"]
     filter_options = ['tables','columns','values','all']
     allow_hashes = Hashes.get_available_algorithms()
@@ -35,13 +38,13 @@ class Settings:
             "host":"",
             "username":"",
             "password":"",
-            "database":"",
+            "name":"",
             "dbms":"postgres"
         },
         "Results":{
             "output":"",
-            "format":'csv',
-            "csvdelimiter":","
+            "format":'xls'
+            
         },
         "sqlmap":{
             "input":"",
@@ -49,6 +52,14 @@ class Settings:
             "database":""
         }
     }
+
+    @staticmethod
+    def get_default_commands():
+        formatted_comands = []
+        for command in Settings._default_commands:
+            formatted_comands.append(Settings.COMMAND_PREFIX+command)
+        
+        return formatted_comands
 
 
     @staticmethod
@@ -81,6 +92,10 @@ class Settings:
         except Exception as e:
             raise MapXploreException(message=str(e))
 
+    @staticmethod
+    def get_principal_db(dbms)->str:
+        return Settings.principal_databases[dbms]
+
 class BaseSetting:
     _instance = None
     __setting_key__ = None
@@ -104,6 +119,8 @@ class BaseSetting:
         value = self._get_value(key)
         return value if value is not None else False
     
+    def set_value(self, section, value):
+        Settings.setting[self.__setting_key__][section]=value
     @property
     def keys(self):
         return Settings.setting[self.__setting_key__].keys()
@@ -130,9 +147,25 @@ class ResultSetting(BaseSetting):
         return self._get_value("format")
     
     @property
-    def csv_delimiter(self)->str:
-        return self._get_value("csvdelimiter")
+    def isHtml(self):
+        if self.format.lower() == 'html':
+            return True
+        elif self.format.lower() == 'xlsx':
+            return False
+        else:
+            raise MapXploreException(message_key="errors.invalid_format")
     
+    def get_folder_output(self, path_to_join=None):
+        database_name = ""
+        if DatabaseSetting().database_name:
+            database_name = DatabaseSetting().database_name
+        elif SqlMapSetting().database:
+            database_name = SqlMapSetting().database
+        if path_to_join:
+            return os.path.join(self.output, database_name, path_to_join)
+        else:
+            return os.path.join(self.output, database_name)
+
 class DatabaseSetting(BaseSetting):
     __setting_key__ = "Database"
     
@@ -146,7 +179,7 @@ class DatabaseSetting(BaseSetting):
     
     @property
     def database_name(self)->str:
-        return self._get_value("database")
+        return self._get_value("name")
     
     @property
     def dbms(self)->str:

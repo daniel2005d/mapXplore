@@ -1,7 +1,7 @@
 import os
 from openpyxl import Workbook
 from jinja2 import Environment, FileSystemLoader
-from config.settings import ResultSetting
+from config.settings import ResultSetting, DatabaseSetting
 from model.result import Result, QueryResult
 from utils.utils import Hashing
 
@@ -9,11 +9,7 @@ class SaveManager:
     def __init__(self) -> None:
         self._results = ResultSetting() #Settings.setting["Results"]
         self._output = self._results.output
-        self._format = self._results.format
-        if self._output:
-            self._output_dir = os.path.join(self._output, self._format)
-
-        self._delimiter = self._results.csv_delimiter
+        
         if self._output is None:
             home = os.path.expanduser("~")
             self._output = os.path.join(home,'.local','share','mapXplore')
@@ -46,10 +42,12 @@ class SaveManager:
         self._write_content(content, path)
         return path
     
-    def convert_content_to_plain(self, items:QueryResult, format:str, delimiter:str=None)->str:
-        if format == 'csv':
+    def convert_content_to_plain(self, items:QueryResult)->str:
+        
+        self._output_dir = ResultSetting().get_folder_output()
+        if not ResultSetting().isHtml:
             return self.convert_to_csv(items)
-        if format == 'html':
+        else:
             files = []
             for item in items:
                 html = self.convert_to_html(item.results)

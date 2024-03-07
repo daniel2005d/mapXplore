@@ -15,9 +15,6 @@ class ImportCommand(CommandSet):
         
         if  SqlMapSetting().file_input == '':
             AnsiPrint.print_locale("import.input_required")
-        
-    set_parser = Cmd2ArgumentParser(add_help="")
-    set_parser.add_argument('option', choices=list(SqlMapSetting().keys))
     
     
     def do_run(self, arg):
@@ -29,7 +26,3 @@ class ImportCommand(CommandSet):
     def do_options(self, arg):
         AnsiPrint.printSetting(SqlMapSetting().key_name)
     
-    @with_argparser(set_parser)
-    def do_set(self, arg):
-        pass
-        

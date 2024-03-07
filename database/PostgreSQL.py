@@ -31,7 +31,9 @@ class PostgreSQL(DataBase):
             cur = self._get_cursor()
             generated = cur.execute(sentence, values)
             self._conn.commit()
+            cur.close()
             self._destroy(cur)
+
             return generated
         except Exception as e:
             raise e
@@ -42,6 +44,7 @@ class PostgreSQL(DataBase):
             generated = cur.executemany(sentence, values)
             self._conn.commit()
             self._destroy(cur)
+            cur.close()
             return generated
         except Exception as e:
             raise e
@@ -52,6 +55,7 @@ class PostgreSQL(DataBase):
         cur = self._get_cursor()
         cur.execute(sentence, values)
         results = cur.fetchall()
+        cur.close()
         if showColumns:
             column_names = [desc[0] for desc in cur.description]
             for row in results:
@@ -261,7 +265,7 @@ class PostgreSQL(DataBase):
         select = "Select table_name from information_schema.tables"
         if filter:
             sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
-            select+= " where (table_name ilike {sentence}) and table_schema='public'"
+            select+= f" where (table_name ilike {sentence}) and table_schema='public'"
 
         tables = self._select(select)
         

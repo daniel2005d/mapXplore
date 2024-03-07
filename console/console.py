@@ -66,10 +66,14 @@ class MainConsole(cmd2.Cmd):
         return data
     
     def do_quit(self, arg):
+        """Exit of the application
+        """
         return True
     
     
     def do_back(self, args):
+        """Return to main module
+        """
         if len(self._commands) > 0:
             command = self._commands.pop()
             self.unregister_command_set(command["command"])
@@ -78,6 +82,8 @@ class MainConsole(cmd2.Cmd):
 
     @with_argparser(use_parser)
     def do_use(self, arg):
+        """"Load config or import a module
+        """
         self._load_module(arg)
 
 def main(args):

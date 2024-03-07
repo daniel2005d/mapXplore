@@ -87,7 +87,7 @@ class DataImporter():
         index_ext = file.index('.')
         file_name = file[:index_ext].lower()
         ### Get Dat file structure and information
-        AnsiPrint.print_locale("import.reading_file", end='', filename=file_name)
+        AnsiPrint.print_locale("import.reading_file", end=' '*10, filename=file_name)
         file_content = csv.get_structure(path)
         ## Create Table and Columns
         table_columns = file_content.headers
@@ -95,11 +95,11 @@ class DataImporter():
             self._summary["tables"].append(file_name)
         """Create tables
         """
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)-1}]", end='')
+        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)}]", end=' '*10)
         db.create_table(file_name, table_columns)
         db.insert_many(file_name,file_content.rows, table_columns)
         self._summary["rows"]+=len(file_content.rows)
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]")
+        AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]", end=' '*10)
 
     def start(self):
         try:
@@ -132,7 +132,7 @@ class DataImporter():
                     self._summary["databases"].append(dir.lower())
                     AnsiPrint.print(f"Creating database [yellow][bold]{dir.lower()}[reset]")
 
-                    db = self._get_connection(Settings.principal_databases.get(self._dbConfig.dbms))
+                    db = self._get_connection(Settings.get_principal_db(self._dbConfig.dbms))
                     db.create_database(dir)
                     self.create_tables(dir, os.path.join(dump_dir, dir))
             else:
