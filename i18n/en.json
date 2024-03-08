@@ -9,6 +9,7 @@
     "dir_not_not":"Directory [bold]{directory}[reset] not exists",
     "databasenull":"You need set database name option",
     "saved_results":"[!] Saved to [yellow][bold]{saved}[reset]",
+    "clean_results":"[yellow][bold]{num}[reset][yellow] results were cleaned[reset]",
     "import":{
         "input_required":"[!] [yellow]You must set import input folder[reset]",
         "title":"Summary",

@@ -101,7 +101,12 @@ class DataManager:
         if file_format in Settings.valid_format_files:
             file = self._export_manager.convert_content_to_plain(self._results)
             AnsiPrint.print_locale("saved_results", saved=file)
-    
+            
+    def clean(self):
+        length_results = len(self._results)
+        self._results.clear()
+        AnsiPrint.print_locale("clean_results", num=length_results)
+
     def export(self, format:str=None):
         if len(self._results) > 0:
             self._save(format)

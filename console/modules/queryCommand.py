@@ -20,7 +20,6 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         self._filter_options = Settings.filter_options
         self._config = ResultSetting()
         self._core = DataManager()
-        self._results = []
         self._remove_default_commands()
 
     parser = Cmd2ArgumentParser(add_help="")
@@ -56,6 +55,10 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         
         return completions
     
+    
+    def do_clean(self, arg):
+        self._core.clean()
+
     def do_save(self, arg):
         """Stores the queries performed in HTML or CSV formats
         """
@@ -88,7 +91,5 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
                 hash_type = option
 
         if value is not None:
-            results = self._core.run(query_option, value, hash_type)
-            if results:
-                self._results.append(results)
-  
+            self._core.run(query_option, value, hash_type)
+            
