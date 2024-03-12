@@ -10,7 +10,7 @@ class DataBase:
                 self.password = connectionsettings.password
                 self.host = connectionsettings.server
 
-            self._database = dbname
+            self._database = dbname.lower() if dbname else None
             self._status_handler = None
             self._hashcolumn = Settings.checksum_column
             self._tables = []
@@ -64,6 +64,9 @@ class DataBase:
 
     def get_tables_and_columns(self):
         raise ModuleNotFoundError(f"{str(self)} Not implemented")
+    
+    def get_tables_count(self) -> Result:
+        raise ModuleNotFoundError("get_tables_count() Not implemented")
 
     """
     Retrieve all tables and columns to try find out

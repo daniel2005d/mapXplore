@@ -35,7 +35,7 @@ class DbConnector:
                 con = SQLite(database, None)
             if con:
                 con.test_connection()
-        except Exception as e:
+        except Exception as e: 
             raise e
         
         return con

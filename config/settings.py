@@ -96,7 +96,8 @@ class Settings:
                 raise MapXploreException(message=locale.get("errors.file_not_exists").format(file=filename))
             else:
                 with open(filename, "r") as jfile:
-                    Settings.setting.update(json.load(jfile))
+                    json_data = json.load(jfile)
+                    Settings.setting.update(json_data)
         except Exception as e:
             raise MapXploreException(message=str(e))
 
@@ -144,7 +145,11 @@ class ResultSetting(BaseSetting):
 
     @property
     def output(self)->str:
-        return self._get_value("output")
+        output_dir = self._get_value("output")
+        if output_dir:
+            output_dir = os.path.expanduser(output_dir)
+        
+        return output_dir
 
     @output.setter
     def output(self, value)->str:
@@ -169,10 +174,12 @@ class ResultSetting(BaseSetting):
             database_name = DatabaseSetting().database_name
         elif SqlMapSetting().database:
             database_name = SqlMapSetting().database
+        
+        main_directory = os.path.expanduser(self.output)
         if path_to_join:
-            return os.path.join(self.output, database_name, path_to_join)
+            return os.path.join(main_directory, database_name, path_to_join)
         else:
-            return os.path.join(self.output, database_name)
+            return os.path.join(main_directory, database_name)
 
 class DatabaseSetting(BaseSetting):
     __setting_key__ = "Database"
@@ -211,6 +218,7 @@ class GeneralSetting(BaseSetting):
 class SqlMapSetting(BaseSetting):
     __setting_key__ = "sqlmap"
 
+
     @property
     def file_input(self)->str:
         return self._get_value("input")
@@ -222,3 +230,8 @@ class SqlMapSetting(BaseSetting):
     @property
     def database(self)->str:
         return self._get_value("database")
+    
+    def get_dump_dir(self)->str:
+        dump_directory = os.path.expanduser(self.file_input)
+        dump_directory = os.path.join(dump_directory, "dump")
+        return dump_directory

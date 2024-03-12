@@ -120,9 +120,10 @@ class DataImporter():
             if self._database is None:
                 directories,dump_dir = self._get_directories(self._directory)
             else:
-                dump_dir = os.path.join(self._directory,"dump")
-                if not os.path.exists(dump_dir):
-                    AnsiPrint.print_error(f"Directory {dump_dir} does not exists")
+                dump_dir = SqlMapSetting().get_dump_dir()
+                if not dump_dir:
+                    AnsiPrint.print_error(f"Directory {SqlMapSetting().file_input} does not exists")
+                    return
 
                 directories.append(self._database)
 

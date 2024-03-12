@@ -1,13 +1,19 @@
 import psycopg2
 from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
+from connection import Connection
+from config.settings import Settings
 from db import DataBase
-from utils.utils import CastDB
 from model.result import Result
 from model.query import Query
-from config.settings import Settings
 from typing import List
+from utils.utils import CastDB
 
 class PostgreSQL(DataBase):
+    
+    def __init__(self, dbname:str, connectionsettings:Connection):
+        super().__init__(dbname=dbname, connectionsettings=connectionsettings)
+        self._tables_schema = "information_schema.tables"
+        
 
     @property
     def principal_database(self)->str:
@@ -15,7 +21,10 @@ class PostgreSQL(DataBase):
 
     def _get_cursor(self):
             try:
-                self._conn = psycopg2.connect(dbname=self._database if self._database is not None else self.principal_database, user=self.username, password=self.password, host=self.host)
+                self._conn = psycopg2.connect(dbname=self._database if self._database is not None else self.principal_database, 
+                                              user=self.username, 
+                                              password=self.password, 
+                                              host=self.host, connect_timeout=30)
                 self._conn.set_isolation_level(ISOLATION_LEVEL_AUTOCOMMIT);
                 cursor = self._conn.cursor()
                 return cursor
@@ -145,6 +154,18 @@ class PostgreSQL(DataBase):
             return queries
         
         return []
+    
+    def get_tables_count(self)->Result:
+        result = Result(headers=['Table', "Rows"])
+        tables = self.search_tables(filter=None)
+        for tbl in tables.rows:
+            table_name = tbl[0]
+            sentence = f"Select count(*) from {table_name}"
+            rows = self._select(sentence)
+            for row in rows:
+                result.rows.append([table_name, row[0]])
+        
+        return result
 
     def get_tables_and_columns(self):
         sentence = f"""
@@ -255,10 +276,10 @@ class PostgreSQL(DataBase):
     def search_tables(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
         result = Result(headers=['tables'])
         tables = None
-        select = "Select table_name from information_schema.tables"
+        select = "Select table_name from information_schema.tables where table_schema='public' "
         if filter:
             sentence = self._get_sentence(filter, operator, logic_operator).format(object_name='table_name')
-            select+= f" where (table_name ilike {sentence}) and table_schema='public'"
+            select+= f" and (table_name ilike {sentence})"
 
         tables = self._select(select)
         

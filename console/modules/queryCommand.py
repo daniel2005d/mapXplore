@@ -71,7 +71,9 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
     def do_select(self, arg):
         self._core.select(arg)
 
-    
+    def do_tables(self, _):
+        self._core.table_count_rows()
+
     def do_search(self, arg):
         """
         Facilitates searching for the imported information

@@ -112,6 +112,11 @@ class DataManager:
             self._save(format)
         else:
             AnsiPrint.print_info(locale.get("cannot_export"))
+    
+    def table_count_rows(self):
+        self._create_dbCursor()
+        tables = self._cursor.get_tables_count()
+        AnsiPrint.printResult(tables)
 
     def run_query(self, sentence, value_to_hight_light):
         """Run the query and highlight the text that matches.

@@ -91,7 +91,7 @@ class SQLite(DataBase):
         return self._select(query, showColumns=True)
 
     def create_database(self, dbname:str):
-        
+        dbname = dbname.lower()
         path_db = self._get_db_file()
         db_file = os.path.join(path_db, dbname+".db")
         if os.path.exists(db_file):
@@ -103,6 +103,17 @@ class SQLite(DataBase):
     def check_exists_table(self, tablename:str) -> bool:
         table = self._select("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (tablename,))
         return len(table)>0
+    
+    def get_tables_count(self) -> Result:
+        result = Result(headers=['Table', "Rows"])
+        tables = self.get_tables()
+        for tbl in tables:
+            table_name = tbl[0]
+            rows = self._select(f"Select count(*) from {table_name}")
+            for row in rows:
+                result.rows.append([table_name, row[0]])
+        
+        return result
 
     def get_tables(self):
         tables = self._select("Select name from sqlite_master where type='table'")
