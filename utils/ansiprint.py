@@ -57,11 +57,13 @@ class AnsiPrint:
                 columns.append(Column(ansi.style(header, bold=True,italic=True, bg=EightBitBg.GRAY_53), width=column_width))
             
             if result.formatted_len > 0:
-                for row in result.formatted_rows:
-                    data_list.append(row)
+                data_list = [sub for sub in result.formatted_rows]
+                # for row in result.formatted_rows:
+                #     data_list.append(row)
             else:
-                for row in result.rows:
-                    data_list.append(row)
+                data_list = [sub for sub in result.rows]
+                # for row in result.rows:
+                #     data_list.append(row)
             
             bt = BorderedTable(columns)
             table = bt.generate_table(data_list)

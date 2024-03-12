@@ -4,3 +4,4 @@ __pycache__
 sqlite.db
 sample.py
 *.cast
+log.txt

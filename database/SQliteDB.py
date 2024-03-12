@@ -231,3 +231,15 @@ class SQLite(DataBase):
             self._executemany(sentence, data)
         except Exception as e:
             raise e
+    
+    # def select_table(self, table_name:str) -> Result:
+    #     result = Result()
+    #     rows = self._select(f"Select * from {table_name}", showColumns=True)
+    #     if rows:
+    #         result.headers=list(rows[0].keys())
+    #         for row in rows:
+    #             result.rows.append(list(row.values()))
+        
+    #     return result
+
+

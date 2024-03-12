@@ -141,7 +141,6 @@ class DataManager:
 
         return information
 
-    
     def run(self, option:QueryType, value, hash_type:str=None) -> Result:
         try:
             results = None
@@ -175,3 +174,12 @@ class DataManager:
             AnsiPrint.print_error(e)
 
         return results
+    
+    def select(self, tables:list[str]) -> None:
+        self._create_dbCursor()
+        for tbl in tables.split(','):
+            if self._cursor.check_exists_table(tbl):
+                table = self._cursor.select_table(tbl)
+                AnsiPrint.printResult(table)
+            else:
+                AnsiPrint.print_locale("table_not_exists",table_name=tbl)

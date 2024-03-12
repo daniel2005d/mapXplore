@@ -10,6 +10,7 @@
     "databasenull":"You need set database name option",
     "saved_results":"[!] Saved to [yellow][bold]{saved}[reset]",
     "clean_results":"[yellow][bold]{num}[reset][yellow] results were cleaned[reset]",
+    "table_not_exists":"Table [red]{table_name}[reset] does not exists",
     "import":{
         "input_required":"[!] [yellow]You must set import input folder[reset]",
         "title":"Summary",

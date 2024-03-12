@@ -82,4 +82,13 @@ class DataBase:
         line = ''.join(data)
         return Hashing.get_md5(line)
 
+    def select_table(self, table_name:str) -> Result:
+        result = Result()
+        rows = self._select(f"Select * from {table_name}", showColumns=True)
+        if rows:
+            result.headers=list(rows[0].keys())
+            for row in rows:
+                result.rows.append(list(row.values()))
+        
+        return result
 

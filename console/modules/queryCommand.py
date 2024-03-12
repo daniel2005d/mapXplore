@@ -67,6 +67,9 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
             self._core.export(format)
         else:
             AnsiPrint.print_error(f"[bold]{format}[reset] is not valid format")
+    
+    def do_select(self, arg):
+        self._core.select(arg)
 
     
     def do_search(self, arg):

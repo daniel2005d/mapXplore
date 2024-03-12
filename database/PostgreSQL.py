@@ -145,8 +145,7 @@ class PostgreSQL(DataBase):
             return queries
         
         return []
-        
-    
+
     def get_tables_and_columns(self):
         sentence = f"""
                     Select table_name, array_agg(column_name||':'||data_type) as columns
@@ -184,7 +183,6 @@ class PostgreSQL(DataBase):
           create_db = f'CREATE DATABASE "{dbname.lower()}" WITH OWNER={self.username} TEMPLATE template0'
           self._execute(create_db)
         
-   
     def create_table(self, name:str, columns=None):
         try:
            dbexists = self._check_exists_db(self._database)
@@ -197,9 +195,6 @@ class PostgreSQL(DataBase):
                  self.create_columns(name, columns)
         except Exception as e:
             raise e
-
-    
-
 
     def create_columns(self, tablename:str, columns):
         try:
@@ -243,7 +238,6 @@ class PostgreSQL(DataBase):
 
         return sentence
 
-
     def insert_data(self, tablename, data, columns=None):
         try:
             sentence = self._get_insert_sentence(tablename, data, columns)
@@ -257,7 +251,6 @@ class PostgreSQL(DataBase):
             self._executemany(sentence, data)
         except Exception as e:
             raise e
-
 
     def search_tables(self, filter:str,operator:str='ilike', logic_operator:str='or') -> Result:
         result = Result(headers=['tables'])
