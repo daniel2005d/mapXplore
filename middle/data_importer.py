@@ -14,7 +14,6 @@ class DataImporter():
         self._summary = None
         self._db = None
 
-    
     def _bind_config(self):
         self._database = None
         if SqlMapSetting().database:
@@ -33,16 +32,6 @@ class DataImporter():
         self._db = connection._createDBEngine()
         return self._db
         
-
-    def _get_directories(self, directory:str):
-        dump_dir = os.path.join(directory,'dump')
-        if os.path.exists(dump_dir):
-            directories = [name for name in os.listdir(dump_dir) if os.path.isdir(os.path.join(dump_dir, name))]
-            return directories,dump_dir
-        else:
-            AnsiPrint.print_error(locale.get('dir_not_not').format(directory=dump_dir))
-            return [],None
-    
     def _print_summary(self):
         summary = Result()
         if self._summary is not None:
@@ -63,18 +52,13 @@ class DataImporter():
 
             AnsiPrint.printResult(summary)
 
-    def create_tables(self, database:str, directory:str):
-        
-        files = []
-        for name in os.listdir(directory):
-            if not name.startswith("."):
-                if os.path.isfile(os.path.join(directory, name)):
-                    files.append(name)
+    def create_tables(self, database:str):
 
+        files = SqlMapSetting().get_files_ofDatabase()
         for file in files:
             try:
-                self._summary["files"].append(file)
-                file_path = os.path.join(directory, file)
+                self._summary["files"].append(file["filename"])
+                file_path = file["path"]
                 self.insert_data(database,file_path)
             except Exception as e:
                 txt = f"Error into {file} => {str(e)}"
@@ -102,9 +86,11 @@ class DataImporter():
         AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]", end=' '*10)
 
     def start(self):
+        old_db = DatabaseSetting().database_name
         try:
             stopwatch = Stopwatch()
             stopwatch.start()
+            
             self._summary = {
                 "databases":[],
                 "tables":[],
@@ -114,33 +100,21 @@ class DataImporter():
 
             }
             self._bind_config()
-            directories = []
-            
-            dump_dir = ""
-            if self._database is None:
-                directories,dump_dir = self._get_directories(self._directory)
-            else:
-                dump_dir = SqlMapSetting().get_dump_dir()
-                if not dump_dir:
-                    AnsiPrint.print_error(f"Directory {SqlMapSetting().file_input} does not exists")
-                    return
-
-                directories.append(self._database)
-
-            if directories is not None:
-                for dir in directories:
-
-                    self._summary["databases"].append(dir.lower())
-                    AnsiPrint.print(f"Creating database [yellow][bold]{dir.lower()}[reset]")
+            databases = SqlMapSetting().get_databases()
+            if databases is not None:
+                for name in databases:
+                    SqlMapSetting().database=name
+                    self._summary["databases"].append(name.lower())
+                    AnsiPrint.print(f"\r\nCreating database [yellow][bold]{name.lower()}[reset]")
 
                     db = self._get_connection(Settings.get_principal_db(self._dbConfig.dbms))
-                    db.create_database(dir)
-                    self.create_tables(dir, os.path.join(dump_dir, dir))
-            else:
-                AnsiPrint.print_error(f'The {dump_dir} directory does not exists.')
+                    db.create_database(name)
+                    self.create_tables(name)
             
             stopwatch.stop()
             self._summary["elapsed"]= str(stopwatch)
             self._print_summary()
         except Exception as e:
             AnsiPrint.print_error(e)
+        finally:
+            SqlMapSetting().database = old_db

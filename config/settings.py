@@ -34,11 +34,10 @@ class Settings:
         "General":{
             "debug":False
         },
-        "Database":{
+        "Server":{
             "host":"",
             "username":"",
             "password":"",
-            "name":"",
             "dbms":"postgres"
         },
         "Results":{
@@ -78,6 +77,7 @@ class Settings:
     def save_settings(filename:str, override=False)->None:
         
         try:
+            filename = os.path.expanduser(filename)
             if Util.check_file(filename) and not override:
                 raise MapXploreException(message_key="file_exists", isError=False)
             else:
@@ -130,6 +130,7 @@ class BaseSetting:
     
     def set_value(self, section, value):
         Settings.setting[self.__setting_key__][section]=value
+    
     @property
     def keys(self):
         return Settings.setting[self.__setting_key__].keys()
@@ -182,7 +183,7 @@ class ResultSetting(BaseSetting):
             return os.path.join(main_directory, database_name)
 
 class DatabaseSetting(BaseSetting):
-    __setting_key__ = "Database"
+    __setting_key__ = "Server"
     
     @property
     def section_name(self) -> str:
@@ -194,7 +195,8 @@ class DatabaseSetting(BaseSetting):
     
     @property
     def database_name(self)->str:
-        return self._get_value("name")
+        sqlmap_db = SqlMapSetting().database
+        return sqlmap_db.lower() if sqlmap_db is not None else None
     
     @property
     def dbms(self)->str:
@@ -231,7 +233,39 @@ class SqlMapSetting(BaseSetting):
     def database(self)->str:
         return self._get_value("database")
     
+    @database.setter
+    def database(self, value)->str:
+        self.set_value("database", value)
+    
     def get_dump_dir(self)->str:
         dump_directory = os.path.expanduser(self.file_input)
         dump_directory = os.path.join(dump_directory, "dump")
         return dump_directory
+    
+    def get_files_ofDatabase(self) -> dict:
+        dump_dir = self.get_dump_dir()
+        files = []
+        
+        dump_dir = os.path.join(dump_dir, self.database)
+        for name in os.listdir(dump_dir):
+            if not name.startswith("."):
+                path_file = os.path.join(dump_dir, name)
+                if os.path.isfile(path_file):
+                    files.append({"filename":name, "path":path_file})
+    
+        return files
+    
+    def get_databases(self):
+        directories = []
+        dump_dir = self.get_dump_dir()
+        if self.database:
+            directories.append(self.database)
+        else:
+            if os.path.exists(dump_dir):
+                directories = [name for name in os.listdir(dump_dir) if os.path.isdir(os.path.join(dump_dir, name))]
+                
+            else:
+                raise MapXploreException(message=locale.get("dir_not_not").format(directory=dump_dir))
+            
+        return directories
+

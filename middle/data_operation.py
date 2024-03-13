@@ -115,8 +115,9 @@ class DataManager:
     
     def table_count_rows(self):
         self._create_dbCursor()
-        tables = self._cursor.get_tables_count()
-        AnsiPrint.printResult(tables)
+        if self._cursor:
+            tables = self._cursor.get_tables_count()
+            AnsiPrint.printResult(tables)
 
     def run_query(self, sentence, value_to_hight_light):
         """Run the query and highlight the text that matches.

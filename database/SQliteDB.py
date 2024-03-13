@@ -2,7 +2,7 @@ import os
 import sqlite3
 from typing import List
 from db import DataBase
-from config.settings import ResultSetting
+from config.settings import ResultSetting, DatabaseSetting
 from lib.save_manager import SaveManager
 from model.query import Query
 from model.result import Result
@@ -17,7 +17,7 @@ class SQLite(DataBase):
 
     def _get_db_file(self):
         manager = SaveManager()
-        path = os.path.join(ResultSetting().output, "db")
+        path = os.path.join(ResultSetting().output,DatabaseSetting().database_name, "db")
         manager._create_directory(path)
         return path
     
@@ -158,12 +158,12 @@ class SQLite(DataBase):
         for row in rows:
             query=""
             table_name = row["table_name"]
-            columns_list = ','.join(row["columns"])
+            columns_list = ','.join(f'[{col}]' for col in row["columns"])
             for index, col in enumerate(row["columns"]):
                 if index == 0:
-                    query = f"{col} like '%{value_to_find}%'"
+                    query = f"[{col}] like '%{value_to_find}%'"
                 else:
-                    query += f" {operator} {col} like '%{value_to_find}%'"
+                    query += f" {operator} [{col}] like '%{value_to_find}%'"
                 
             sentence = f"Select {columns_list} from {table_name} where {query}"
             queries.append(Query(word=value_to_find, sentence=sentence, tablename=table_name))
@@ -183,7 +183,7 @@ class SQLite(DataBase):
 
         for _,column in enumerate(columns):
             if not self._check_exists_column(tablename, column):
-                sentence = f"ALTER TABLE {tablename} ADD COLUMN {column.lower()} TEXT"
+                sentence = f"ALTER TABLE {tablename} ADD COLUMN [{column.lower()}] TEXT"
                 self._execute(sentence)
                 
     def insert_data(self, tablename, data, columns=None):
