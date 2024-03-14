@@ -76,9 +76,10 @@ class MainConsole(cmd2.Cmd):
         """
         if len(self._commands) > 0:
             command = self._commands.pop()
+            if hasattr(command["command"],"close_connection"):
+                command["command"].close_connection()
+                
             self.unregister_command_set(command["command"])
-        
-        
 
     @with_argparser(use_parser)
     def do_use(self, arg):

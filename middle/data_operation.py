@@ -30,7 +30,7 @@ class DataManager:
                             username=DatabaseSetting().username, password=DatabaseSetting().password, 
                             dbms=DatabaseSetting().dbms)
             self._cursor = db._createDBEngine()
-            
+    
     
     def _get_values_to_find(self, word:str)->str:
         criterial = []
@@ -189,3 +189,7 @@ class DataManager:
                 AnsiPrint.printResult(table)
             else:
                 AnsiPrint.print_locale("table_not_exists",table_name=tbl)
+
+    def close(self):
+        if self._cursor:
+            self._cursor.close()

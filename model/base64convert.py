@@ -3,5 +3,5 @@ class Base64File:
         self.extension = None
         self.filename = None
         self.content = None
-        for argv in kwargs.items():
-            setattr(self, argv, kwargs[argv])
+        for key, value in kwargs.items():
+            setattr(self, key, value)

@@ -41,13 +41,15 @@ class Color:
     def highlight_text(text:str, match_word:str, color:str='red')->str:
         text = str(text)
         formatted = False
-        matches = re.search(match_word, text, flags=re.IGNORECASE)
-        hight_light = text
-        if matches:
-            formatted = True
-            start = matches.start()
-            end = matches.end()
-            hight_light = Color.format(f"{text[:start]}[{color}]{text[start:end]}[reset]{text[end:]}")
+        hight_light = re.sub(match_word, f"[{color}]{match_word}[reset]", text, flags=re.IGNORECASE)
+        #matches = re.search(match_word, text, flags=re.IGNORECASE)
+        
+        # hight_light = text
+        # for match in re.finditer(match_word, text, flags=re.IGNORECASE):
+        #     formatted = True
+        #     start = match.start()
+        #     end = match.end()
+        #     hight_light = Color.format(f"{hight_light[:start]}[{color}]{hight_light[start:end]}[reset]{hight_light[end:]}")
         
         return Color.format(hight_light), formatted
 

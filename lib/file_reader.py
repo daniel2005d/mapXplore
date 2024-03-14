@@ -1,14 +1,18 @@
 import os
 from io import BytesIO
 import io
+from binascii import Error
 import zipfile
 import magic
 from PyPDF2 import PdfReader
+from PyPDF2.errors import PdfReadError
 from openpyxl import load_workbook
+from pptx import Presentation
 from base64 import b64decode
 import xml.etree.ElementTree as ET
 from config.settings import ResultSetting, DatabaseSetting
 from model.base64convert import Base64File
+from model.base64_item import Base64Item
 from utils.utils import Util
 from utils.ansiprint import AnsiPrint
 from lib.save_manager import SaveManager
@@ -44,7 +48,7 @@ class FileReader:
             text+=page.extract_text()
 
         return text
-    
+        
     def _read_word(self, zip_file, document_name)->str:
         text=""
         with zip_file.open(document_name) as xml:
@@ -73,13 +77,15 @@ class FileReader:
         
         return text
     
-    def _read_ppt(self, zip_file):
+    def _read_ppt(self, content:bytes)->str:
         text=""
-        with zip_file.open('ppt/presentation.xml') as xml:
-            tree = ET.parse(xml)
-            root = tree.getroot()
-            for child in root:
-                text+=child.tag
+        with BytesIO(content) as stream:
+            presentation = Presentation(stream)
+            for slide in presentation.slides:
+                for shape in slide.shapes:
+                    if hasattr(shape, 'text'):
+                        text+=shape.text+'\n'
+        
         return text
     
     def _get_extension(self, mime_type:str)->str:
@@ -92,8 +98,8 @@ class FileReader:
             text = '\n'.join(zip_file.namelist())
         
         return text
-    def get_file_type(self, content):
-        content_bytes = b64decode(content)
+    def get_file_type(self, content_bytes:bytes):
+        #content_bytes = b64decode(content)
         return self.get_office(content_bytes)
     
         
@@ -111,18 +117,18 @@ class FileReader:
                                 document_type = 'xlsx'
                                 text = self._read_excel(content)
                         elif 'ppt/presentation.xml' in zip_file.namelist():
-                                return self._read_ppt(zip_file)
+                                document_type = 'pptx'
+                                text = self._read_ppt(content)
         
         return document_type, text
     
     
     def _is_base64_valid(self, text:str)->bool:
-        if text is None or text.isdigit() or text == '' or len(text) %4 != 0:
+        if text is None or text.isdigit() or text == '':
            return False, None
         else:
            for character in text:
                if character in self._invalid_b64_chars:
-                   AnsiPrint.print_debug(f"Invalid char {character}" )
                    return False, None
                
         return True, None
@@ -136,64 +142,87 @@ class FileReader:
         
         return None
     
-    def _complete_padding(self, text)->str:
+    def _complete_padding(self, text)->Base64Item:
         current_length = len(text)%4
+        new_text = None
         if current_length > 0:
             padding_needed = 4-current_length
             new_text = text+("="*padding_needed)
-            return new_text
-        else:
-            return text
+        
+        return Base64Item(original_text=text, fixed=new_text)
     
+    def _decode(self, text:str)->Base64Item:
+        item = Base64Item ()
+        try:
+            item.original_text = text
+            item.fixed = self._complete_padding(text).fixed
+            item.content = b64decode(text)
+            
+        except Error as be:
+            if str(be) == 'Incorrect padding':
+                fixed_text = self._complete_padding(text).fixed
+                item.content = b64decode(fixed_text)
+                
+        except Exception as ex:
+            AnsiPrint.print_debug(ex)
+        
+        return item
+            
+
     def get_from_base64(self, text:str) -> Base64File:
         file = Base64File()
         try:
             if text:
-                if text.startswith("/9j/"):
-                    text = self._complete_padding(text)
-                elif text.startswith("data:image/"):
+                # if text.startswith("/9j/"):
+                #     #text = self._complete_padding(text)
+                #     print("")
+                if text.startswith("data:image/"):
                     text = text.split(",")[1]
 
                 content = None
                 content_bytes = None
+                
                 valid, _ = self._is_base64_valid(text)
                 
                 if valid:
-                    try:
-                        content_bytes = b64decode(text)
-                        text_type = magic.from_buffer(content_bytes, mime=True)
-                        ext, format = self._get_extension(text_type)
-                        if ext == 'plain':
-                            ext = 'txt'
-                            if text[-2:] == '==':
+                    decoded = self._decode(text)
+                    content_bytes = decoded.content
+                    if content_bytes:
+                        try:
+                            
+                            text_type = magic.from_buffer(content_bytes, mime=True)
+                            ext, format = self._get_extension(text_type)
+                            if ext == 'plain':
+                                ext = 'txt'
+                                if text[-2:] == '==':
+                                    content = Util.get_readable_content(content_bytes)
+                                elif Util.is_readable(content_bytes):
+                                    content = content_bytes.decode('latin')
+                                else:
+                                    return file
+                            elif ext == 'csv':
                                 content = Util.get_readable_content(content_bytes)
-                            elif Util.is_readable(content_bytes):
-                                content = content_bytes.decode('latin')
-                            else:
+                            elif ext == 'xml':
+                                content = Util.get_readable_content(content_bytes)
+                            elif ext == 'pdf':
+                                content = self._read_pdf(content_bytes)
+                            elif format == 'image': # We cannot convert to readable format
+                                content = text
+                            elif ext == 'zip':
+                                content = self.get_zip_files(content_bytes)
+                            elif format == 'application' and 'office' not in ext:
                                 return file
-                        elif ext == 'csv':
-                            content = Util.get_readable_content(content_bytes)
-                        elif ext == 'xml':
-                            content = Util.get_readable_content(content_bytes)
-                        elif ext == 'pdf':
-                            content = self._read_pdf(content_bytes)
-                        elif format == 'image': # We cannot convert to readable format
-                            content = text
-                        elif ext == 'zip':
-                            content = self.get_zip_files(content_bytes)
-                        elif format == 'application' and 'office' not in ext:
+                            
+                        except UnicodeDecodeError as ue:
                             return file
                         
-                    except UnicodeDecodeError as ue:
-                        return file
-                    
-                    if content is None:
-                        ext, content = self.get_file_type(text)
-                    
+                        if content is None:
+                            ext, content = self.get_file_type(content_bytes)
+                        
 
-                    file.extension = ext
-                    file.content = content
-                    file.filename = self._save_file(content_bytes, ext)
+                        file.extension = ext
+                        file.content = content
+                        file.filename = self._save_file(content_bytes, ext)
         except Exception as e:
             AnsiPrint.print_debug(e)
         

@@ -16,6 +16,7 @@ Sus principales caracteristicas son:
     * Archivos .zip
     * Archivos de texto o información en texto plano
     * Imágenes
+    * PDF
 
 * Filtrar tablas y columnas por criterios.
 * Filtrar por diferentes tipos de funciones hash sin requerir su previa conversión.
@@ -62,3 +63,12 @@ python engine.py [--config config.json]
 - [config](configuration.md)
 - [import](import.md)
 - [principal|search](main.md)
+
+
+# Cambios
+
+14.03.2024  - V1.1
+
+* Corrección de errores al leer PPTX
+* Se añade el comando 'tables' para obtener las tablas con el total de registros.
+* Se añade soporte para ~ en la ruta de los archivos

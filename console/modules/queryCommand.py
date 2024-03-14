@@ -21,6 +21,11 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         self._config = ResultSetting()
         self._core = DataManager()
         self._remove_default_commands()
+    
+    def close_connection(self):
+        if self._core:
+            self._core.close()
+        
 
     parser = Cmd2ArgumentParser(add_help="")
     subparser = parser.add_subparsers(dest='section')
@@ -78,6 +83,7 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         """
         Facilitates searching for the imported information
         """
+        query_option = QueryType.NONE
         option = None
         value = None
         hash_type = None
@@ -95,6 +101,8 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
                 query_option = QueryType.VALUES
                 hash_type = option
 
-        if value is not None:
+        if query_option!= QueryType.NONE and value is not None:
             self._core.run(query_option, value, hash_type)
+        else:
+            AnsiPrint.print_locale("errors.no_value_to_search")
             

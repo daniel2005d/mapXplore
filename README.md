@@ -16,6 +16,7 @@ Its main features are:
     * .zip files
     * Text files or plain text information
     * Images
+    * PDF
 
 * Filter tables and columns by criteria.
 * Filter by different types of hash functions without requiring prior conversion.
@@ -61,3 +62,12 @@ python engine.py [--config config.json]
 - [config](doc/en/configuration.md)
 - [import](doc/en/import.md)
 - [principal|search](doc/en/main.md)
+
+# Change Log
+
+14.03.2024  - V1.1
+
+* Error adjustments when reading PPTX files
+* 'tables' command added to retrieve tables with the total number of records*
+* Add support for ~ added in file paths
+

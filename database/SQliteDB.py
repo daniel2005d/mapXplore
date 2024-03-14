@@ -15,6 +15,10 @@ class SQLite(DataBase):
     def principal_database(self)->str:
         return ""
 
+    def close(self):
+        if self._conn:
+            self._conn.close()
+            
     def _get_db_file(self):
         manager = SaveManager()
         path = os.path.join(ResultSetting().output,DatabaseSetting().database_name, "db")

@@ -34,6 +34,11 @@ class PostgreSQL(DataBase):
     def _destroy(self, cursor):
         cursor.close()
         self._conn.close()
+    
+    def close(self):
+        if self._conn:
+            self._conn.close()
+
 
     def _execute(self, sentence, values=None):
         try:

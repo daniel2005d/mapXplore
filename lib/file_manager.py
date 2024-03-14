@@ -34,6 +34,8 @@ class FileManager:
                         if value.lower() in self._char_replacement:
                             value = self._char_replacement[value.lower()]
                         
+                        if value.startswith('UEsDBBQABgAIAAAAIQDdvPp9VAIAABISAAATA'):
+                            print("")
                         file = reader.get_from_base64(value)
                         if file.content is not None:
                             value = file.content 

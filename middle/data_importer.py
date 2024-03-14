@@ -77,8 +77,7 @@ class DataImporter():
         table_columns = file_content.headers
         if file_name not in self._summary["tables"]:
             self._summary["tables"].append(file_name)
-        """Create tables
-        """
+        ## Create tables
         AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)}]", end=' '*10)
         db.create_table(file_name, table_columns)
         db.insert_many(file_name,file_content.rows, table_columns)
@@ -86,7 +85,7 @@ class DataImporter():
         AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]", end=' '*10)
 
     def start(self):
-        old_db = DatabaseSetting().database_name
+        old_db = SqlMapSetting().database
         try:
             stopwatch = Stopwatch()
             stopwatch.start()
