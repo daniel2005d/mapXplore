@@ -70,4 +70,6 @@ python engine.py [--config config.json]
 * Error adjustments when reading PPTX files
 * 'tables' command added to retrieve tables with the total number of records*
 * Add support for ~ added in file paths
-
+* Create subfolder for each file type
+* Add Colors to command prompt
+* Save file with row data 

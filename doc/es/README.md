@@ -72,3 +72,7 @@ python engine.py [--config config.json]
 * Corrección de errores al leer PPTX
 * Se añade el comando 'tables' para obtener las tablas con el total de registros.
 * Se añade soporte para ~ en la ruta de los archivos
+* Crear subcarpeta por cada tipo de archivo
+* Adiciona colores al command prompt
+* Guarda los archivos con datos de la fila que esta consultando.
+
