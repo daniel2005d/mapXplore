@@ -67,7 +67,7 @@ python engine.py [--config config.json]
 
 # Cambios
 
-14.03.2024  - V1.1
+## 14.03.2024  - V1.1
 
 * Corrección de errores al leer PPTX
 * Se añade el comando 'tables' para obtener las tablas con el total de registros.
@@ -76,3 +76,6 @@ python engine.py [--config config.json]
 * Adiciona colores al command prompt
 * Guarda los archivos con datos de la fila que esta consultando.
 
+## 18.03.2024 - V1.2
+
+* Se adiciona el formato JSON para almacenar

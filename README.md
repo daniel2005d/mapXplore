@@ -65,7 +65,7 @@ python engine.py [--config config.json]
 
 # Change Log
 
-14.03.2024  - V1.1
+## 14.03.2024  - V1.1
 
 * Error adjustments when reading PPTX files
 * 'tables' command added to retrieve tables with the total number of records*
@@ -73,3 +73,7 @@ python engine.py [--config config.json]
 * Create subfolder for each file type
 * Add Colors to command prompt
 * Save file with row data 
+
+## 18.03.2024 - V1.2
+
+* Add save to JSON format
