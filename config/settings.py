@@ -5,7 +5,7 @@ from lib.crypto.hashes import Hashes
 from utils.utils import Util
 from middle.mapexception import MapXploreException
 import i18n.locale as locale
-
+from enum import Enum
 
 
 class Settings:
@@ -151,6 +151,11 @@ class BaseSetting:
 
     
 class ResultSetting(BaseSetting):
+    class ExportFileType(Enum):
+        HTML= 0
+        Excel = 1
+        JSON = 2
+
 
     __setting_key__ = "Results"
 
@@ -171,11 +176,13 @@ class ResultSetting(BaseSetting):
         return self._get_value("format")
     
     @property
-    def isHtml(self):
+    def get_FileType(self) -> ExportFileType:
         if self.format.lower() == 'html':
-            return True
+            return ResultSetting.ExportFileType.HTML
         elif self.format.lower() == 'xlsx':
-            return False
+            return ResultSetting.ExportFileType.Excel
+        elif self.format.lower() == 'json':
+            return ResultSetting.ExportFileType.JSON
         else:
             raise MapXploreException(message_key="errors.invalid_format")
     

@@ -1,4 +1,5 @@
 import os
+import json
 from openpyxl import Workbook
 from jinja2 import Environment, FileSystemLoader
 from config.settings import ResultSetting, DatabaseSetting
@@ -43,10 +44,12 @@ class SaveManager:
         return path
     
     def convert_content_to_plain(self, items:QueryResult)->str:
-        
         self._output_dir = ResultSetting().get_folder_output(ResultSetting().format)
-        if not ResultSetting().isHtml:
+        fileType = ResultSetting().get_FileType
+        if fileType == ResultSetting.ExportFileType.Excel:
             return self.convert_to_csv(items)
+        elif fileType == ResultSetting.ExportFileType.JSON:
+            return self.convert_to_json(items)
         else:
             files = []
             for item in items:
@@ -59,7 +62,7 @@ class SaveManager:
         env = Environment(loader=FileSystemLoader("."))
         index_template = env.get_template('/templates/index.html')
         html = index_template.render(files=files)
-        output = self.save(html, 'html', 'index.html', self._output_dir)
+        output = self.save(html, 'html', 'index', self._output_dir)
         return output
     
     def convert_to_html(self, items:Result):
@@ -70,6 +73,26 @@ class SaveManager:
                                 formatted_rows=items.formatted_rows,
                                 table_name=items.table_name)
         return output
+    
+    def convert_to_json(self, items:Result):
+        self._create_directory(self._output_dir)
+        data = []
+        file_name = os.path.join(self._output_dir, Hashing.get_md5(''.join([str(i.criterial) for i in items])))+".json"
+        for item in items:
+            information = {item.value:[]}
+            
+            headers = item.results.headers
+            for row in item.results.rows:
+                for index, value in enumerate(row):
+                    information[item.value].append({headers[index]:value})
+            
+            data.append(information)
+        
+        with open(file_name, "w") as outfile:
+            outfile.write(json.dumps(data, indent=4))
+        
+        return file_name
+                
 
     def convert_to_csv(self, items:QueryResult) -> str:
         try:
