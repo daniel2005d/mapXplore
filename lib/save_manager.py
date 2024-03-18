@@ -37,7 +37,7 @@ class SaveManager:
             if format is not None:
                 name+=f".{format}"
         
-        path = os.path.join(output_directory, name)
+        path = os.path.join(output_directory, f"{name}.{format}")
 
         self._write_content(content, path)
         return path

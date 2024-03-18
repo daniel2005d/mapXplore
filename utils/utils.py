@@ -4,6 +4,7 @@ from base64 import b64decode
 import magic
 import mimetypes
 import os
+from uuid import uuid1
 
 class Util:
 
@@ -14,6 +15,21 @@ class Util:
         
         return True
     
+    @staticmethod
+    def is_bool(value:str)->bool:
+        return value.lower() in ('yes','true','false','no')
+
+    @staticmethod
+    def is_base64(value:str)->bool:
+        isBase64 = False
+        try:
+            b64decode(value)
+            isBase64 = True
+        except:
+            pass
+
+        return isBase64
+
     @staticmethod
     def is_readable(content:bytes)->bool:
         allowed_bytes = set(range(32, 127)) | {10,13} | {241,243,250}
@@ -49,12 +65,28 @@ class Util:
         file_type = mime.from_buffer(decoded_bytes)
         return mimetypes.guess_extension(file_type).replace('.','')
     
+
     @staticmethod
     def get_filename(filename:str)->str:
         full_name = os.path.basename(filename)
         name = os.path.splitext(full_name)[0]
         return name
-    
+
+    @staticmethod    
+    def create_filename(values:list[str], tablename:str=None)->str:
+        file_name = f"{tablename}_" if tablename is not None else ""
+        for index,value in enumerate(values):
+            if not Util.is_bool(value) and not Util.is_base64(value):
+                file_name+=f"{value[:5]}"
+            
+        if file_name.endswith('_'):
+            file_name=file_name[:-1]
+        
+        if file_name.lower() == tablename.lower():
+            file_name = f"{tablename}_{str(uuid1().hex)}"
+
+        return file_name
+
     @staticmethod
     def decode(text:str)->str:
         decoded = text

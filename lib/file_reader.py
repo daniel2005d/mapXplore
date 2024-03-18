@@ -10,7 +10,7 @@ from openpyxl import load_workbook
 from pptx import Presentation
 from base64 import b64decode
 import xml.etree.ElementTree as ET
-from config.settings import ResultSetting, DatabaseSetting
+from config.settings import ResultSetting, DatabaseSetting, Settings
 from model.base64convert import Base64File
 from model.base64_item import Base64Item
 from utils.utils import Util
@@ -45,7 +45,7 @@ class FileReader:
         total_pages = len(reader.pages)
         pages = min(total_pages, max_pages)
         for page in reader.pages:
-            text+=page.extract_text()
+            text+=page.extract_text()+'\n'
 
         return text
         
@@ -133,12 +133,14 @@ class FileReader:
                
         return True, None
     
-    def _save_file(self, content,format:str)->str:
+    def save_file(self, content,format:str, filename=None)->str:
         if content:
-           save = SaveManager()
+            save = SaveManager()
+            subfolder = next(key for key, values in Settings.folder_by_extension.items() if  format in values)
+            output_directory = os.path.join(self._files_directory, subfolder)
         
-           filepath = save.save(content, format if format is not None else "", None, self._files_directory)
-           return filepath
+            filepath = save.save(content, format if format is not None else "", filename, output_directory)
+            return filepath
         
         return None
     
@@ -173,9 +175,6 @@ class FileReader:
         file = Base64File()
         try:
             if text:
-                # if text.startswith("/9j/"):
-                #     #text = self._complete_padding(text)
-                #     print("")
                 if text.startswith("data:image/"):
                     text = text.split(",")[1]
 
@@ -219,10 +218,10 @@ class FileReader:
                         if content is None:
                             ext, content = self.get_file_type(content_bytes)
                         
-
+                        file.bytearray = content_bytes
                         file.extension = ext
                         file.content = content
-                        file.filename = self._save_file(content_bytes, ext)
+                        
         except Exception as e:
             AnsiPrint.print_debug(e)
         

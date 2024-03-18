@@ -3,6 +3,7 @@ from model.filecontent import FileContent
 from config.settings import SqlMapSetting, Settings
 from utils.utils import Hashing
 from utils.utils import Util
+from utils.ansiprint import AnsiPrint
 from lib.file_reader  import FileReader
 import os
 import sys
@@ -18,6 +19,7 @@ class FileManager:
 
 
     def get_structure(self, filename:str) -> FileContent:
+        
         content = FileContent()
         reader = FileReader()
         content.filename = Util.get_filename(filename)
@@ -30,18 +32,33 @@ class FileManager:
                 
                 for line in csv_content:
                     row = []
+                    file_base64 = Util.create_filename(line.values(), content.filename)
+                    
                     for value in line.values():
-                        if value.lower() in self._char_replacement:
-                            value = self._char_replacement[value.lower()]
                         
-                        if value.startswith('UEsDBBQABgAIAAAAIQDdvPp9VAIAABISAAATA'):
-                            print("")
-                        file = reader.get_from_base64(value)
-                        if file.content is not None:
-                            value = file.content 
-                            row.append(value)
-                        else:
-                            row.append(Util.decode(value))
+                        try:
+                            if value is None:
+                                row.append(None)
+                                continue
+                            elif value.lower() in self._char_replacement:
+                                value = self._char_replacement[value.lower()]
+                        
+                            file = reader.get_from_base64(value)
+
+                            if file.content is not None:
+                                value = file.content 
+                                #file.filename = self._save_file(file.content, file.extension)
+                                file.filename = reader.save_file(file.bytearray, file.extension, file_base64)
+                                row.append(value)
+                            else:
+                                if value is not None:
+                                    decoded_value = Util.decode(value)
+                                row.append(decoded_value)
+                            
+                        except Exception as e:
+                            AnsiPrint.print_debug(e)
+                            raise e
+                            
 
                     ## Calculate checksum
                     hash_value = Hashing.get_md5(''.join(value for value in row if value is not None))

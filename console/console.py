@@ -6,7 +6,7 @@ from console.modules.queryCommand import QueryCommandSet
 from console.modules.importCommand import ImportCommand
 import i18n.locale  as locale
 from middle.data_operation import DataManager
-
+from utils.colors import Color
 
 
 class MainConsole(cmd2.Cmd):
@@ -15,7 +15,9 @@ class MainConsole(cmd2.Cmd):
     """
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs, allow_cli_args=False, auto_load_commands=False)
-        self._default_prompt = 'mapXplore # '
+        cmd = Color.format("[red]>[green]>[yellow]>[reset]")
+        self._default_prompt = f'mapXplore {cmd} '
+        
         self.prompt = self._default_prompt
         self.register_postcmd_hook(self._postcmd)
         self.debug=True
@@ -59,7 +61,7 @@ class MainConsole(cmd2.Cmd):
     def _postcmd(self, data: cmd2.plugin.PostcommandData) -> cmd2.plugin.PostcommandData:
         self.prompt = self._default_prompt
         for command in self._commands:
-            self.prompt+=command["module"]+"> "
+            self.prompt+=command["module"]+Color.format("[green]>[reset] ")
 
         if len(self._commands)== 0:
             self._load_module(None)

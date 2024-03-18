@@ -100,6 +100,9 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
             elif option in Settings.allow_hashes:
                 query_option = QueryType.VALUES
                 hash_type = option
+            else:
+                query_option = QueryType.VALUES
+                value = ' '.join(arg.arg_list)
 
         if query_option!= QueryType.NONE and value is not None:
             self._core.run(query_option, value, hash_type)

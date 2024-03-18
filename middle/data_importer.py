@@ -63,6 +63,7 @@ class DataImporter():
             except Exception as e:
                 txt = f"Error into {file} => {str(e)}"
                 AnsiPrint.print_error(txt)
+                self._db.close()
 
     def insert_data(self, database:str, path:str):
         csv = FileManager()

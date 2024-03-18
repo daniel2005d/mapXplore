@@ -58,12 +58,9 @@ class AnsiPrint:
             
             if result.formatted_len > 0:
                 data_list = [sub for sub in result.formatted_rows]
-                # for row in result.formatted_rows:
-                #     data_list.append(row)
             else:
                 data_list = [sub for sub in result.rows]
-                # for row in result.rows:
-                #     data_list.append(row)
+            
             
             bt = BorderedTable(columns)
             table = bt.generate_table(data_list)
@@ -80,14 +77,14 @@ class AnsiPrint:
     @staticmethod
     def print_error(text:str)->None:
         AnsiPrint.print(f"[red][-][bold] {text}[reset]")
-        AnsiPrint.print_debug()
+        AnsiPrint.print_debug(text)
             
 
     @staticmethod
     def print_debug(exception:Exception=None):
         if GeneralSetting().isDebug:
             message = ""
-            if exception is None:
+            if isinstance(exception,Exception):
                 import traceback
                 traceback.print_exc()
                 # exc_type, exc_value, exc_traceback = sys.exc_info()

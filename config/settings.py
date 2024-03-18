@@ -12,6 +12,13 @@ class Settings:
     
     COMMAND_PREFIX = "do_"
    
+    folder_by_extension = {
+        'pdf':['pdf'],
+        'documents':['docx','xlsx','pptx','ppt','doc','xls'],
+        'images':['png','jpg','jpeg','gif'],
+        'text':['txt']
+    }
+    
     special_column_names={
         "TypeTitle":"TypeFormat_{col_name}",
         "ContentTitle":"DataFromBase64_{col_name}"
@@ -60,12 +67,15 @@ class Settings:
         
         return formatted_comands
 
-
+    @staticmethod
+    def parseBool(value:str)->bool:
+        return  value.lower() in ('yes','true','1','t')
+    
     @staticmethod
     def set_value(section, key, value):
         if section in Settings.setting:
             if key in Settings.setting[section]:
-                Settings.setting[section][key]=value
+                Settings.setting[section][key]=value if key != 'debug' else Settings.parseBool(value)
             else:
                 message = locale.get("errors.section_config_error")
                 raise MapXploreException(message=message.format(section=section))
