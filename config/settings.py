@@ -144,7 +144,7 @@ class BaseSetting:
     
     def set_value(self, section, value):
         Settings.setting[self.__setting_key__][section]=value
-    
+        
     @property
     def keys(self):
         return Settings.setting[self.__setting_key__].keys()

@@ -1,8 +1,7 @@
 import cmd2
 from cmd2 import CommandSet, with_default_category
 from cmd2 import Cmd2ArgumentParser,with_argparser
-from config.settings import Settings
-from config.settings import ResultSetting
+from config.settings import ResultSetting, Settings, SqlMapSetting
 from console.modules.argumentsManager import ArgumentsManager
 from middle.data_operation import DataManager, QueryType
 from lib.crypto.hashes import Hashes
@@ -47,9 +46,11 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
 
     @with_argparser(parser)
     def do_set(self, arg):
-        ResultSetting().set_value(arg.section,arg.value)
-        
-    
+        if arg.section != 'database':
+            ResultSetting().set_value(arg.section,arg.value)
+        else:
+            SqlMapSetting().set_value(arg.section,arg.value)
+
     def complete_search(self, text, line, begidx, endidx):
         completions = []
         hashes = list(Hashes.get_available_algorithms())
@@ -84,6 +85,9 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
     
     def do_databases(self, _):
         self._core.databases()
+    
+    def do_columns(self, args):
+        self._core.columns(args.args)
 
 
     def do_search(self, arg):

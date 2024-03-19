@@ -16,7 +16,8 @@ class MainConsole(cmd2.Cmd):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs, allow_cli_args=False, auto_load_commands=False)
         cmd = Color.format("[yellow]>[blue]>[red]>[reset]")
-        self._default_prompt = f'mapXplore {cmd} '
+        prompt = Color.format("[yellow]mapXp[blue]lo[red]re[reset]")
+        self._default_prompt = f'{prompt} {cmd} '
         
         self.prompt = self._default_prompt
         self.register_postcmd_hook(self._postcmd)

@@ -129,6 +129,15 @@ class DataManager:
         databases = cursor.get_databases()
         AnsiPrint.printResult(databases)
 
+    def columns(self, tablename:str):
+        result = Result(headers=['Column Name'])
+        self._create_dbCursor()
+        columns = self._cursor._get_columns(tablename)
+        for col in columns:
+            result.rows.append([col[0]])
+        
+        AnsiPrint.printResult(result)
+
     def run_query(self, sentence, value_to_hight_light):
         """Run the query and highlight the text that matches.
     
