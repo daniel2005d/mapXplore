@@ -57,12 +57,12 @@ class DataImporter():
         files = SqlMapSetting().get_files_ofDatabase()
         for file in files:
             try:
+                
                 self._summary["files"].append(file["filename"])
                 file_path = file["path"]
                 self.insert_data(database,file_path)
             except Exception as e:
-                txt = f"Error into {file} => {str(e)}"
-                AnsiPrint.print_error(txt)
+                AnsiPrint.print_error(e)
                 self._db.close()
 
     def insert_data(self, database:str, path:str):

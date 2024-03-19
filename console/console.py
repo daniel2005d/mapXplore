@@ -15,7 +15,7 @@ class MainConsole(cmd2.Cmd):
     """
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs, allow_cli_args=False, auto_load_commands=False)
-        cmd = Color.format("[red]>[green]>[yellow]>[reset]")
+        cmd = Color.format("[yellow]>[blue]>[red]>[reset]")
         self._default_prompt = f'mapXplore {cmd} '
         
         self.prompt = self._default_prompt

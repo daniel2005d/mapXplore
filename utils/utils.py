@@ -1,10 +1,12 @@
+import os
+import re
 from colored import Style, fore, back
 import hashlib
 from base64 import b64decode
 import magic
 import mimetypes
-import os
 from uuid import uuid1
+
 
 class Util:
 
@@ -17,7 +19,7 @@ class Util:
     
     @staticmethod
     def is_bool(value:str)->bool:
-        return value.lower() in ('yes','true','false','no')
+        return value.lower() in ('yes','true','false','no') if value is not None else False
 
     @staticmethod
     def is_base64(value:str)->bool:
@@ -74,18 +76,34 @@ class Util:
 
     @staticmethod    
     def create_filename(values:list[str], tablename:str=None)->str:
-        file_name = f"{tablename}_" if tablename is not None else ""
-        for index,value in enumerate(values):
-            if not Util.is_bool(value) and not Util.is_base64(value):
-                file_name+=f"{value[:5]}"
+        try:
             
-        if file_name.endswith('_'):
-            file_name=file_name[:-1]
-        
-        if file_name.lower() == tablename.lower():
-            file_name = f"{tablename}_{str(uuid1().hex)}"
+            file_name = f"{tablename}_" if tablename is not None else ""
+            
+            for value in values:
+                if value is not None:
+                    if not Util.is_bool(value) and not Util.is_base64(value):
+                        file_name+=f"{value[:5]}"
+                    
+            if file_name.endswith('_'):
+                file_name=file_name[:-1]
+                
+            if file_name.lower() == tablename.lower():
+                file_name = f"{tablename}_{str(uuid1().hex)}"
 
-        return file_name
+            return file_name
+        except Exception as e:
+            raise e
+    
+    @staticmethod
+    def isHexa(text:str)->bool:
+        decoded = text.encode('unicode_escape').decode('utf-8', 'backslashreplace')
+        return '\\x' in decoded
+
+    @staticmethod
+    def remove_invalidchars(text:str, valid_chars:list[str])->str:
+        filter_text = ''.join(c for c in text if c in valid_chars)
+        return filter_text
 
     @staticmethod
     def decode(text:str)->str:
@@ -93,11 +111,16 @@ class Util:
         try:
             if text is None:
                 return None
+            if Util.isHexa(text):
+                text = repr(text)
+
             if not text.isdigit():
                 decoded = text.encode('latin').decode('unicode_escape')
-        except:
-            pass
-        
+        except Exception as e:
+            hex_values = [ord(c) for c in text]
+            ascii_values = [chr(v) for v in hex_values]
+            decoded = ''.join(c for c in ascii_values if len(c)==1)
+
         return decoded
 
 class Hashing:

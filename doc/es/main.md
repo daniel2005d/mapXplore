@@ -42,6 +42,24 @@ mapXplore # search report
 
 <img src="../screenshot/base64_report.png">
 
+### Obtener Bases de datos
+
+```
+mapXplore # databases
+```
+
+### Obtener tablas
+
+```
+mapXplore # tables
+```
+
+### Obtener todos los registros de una tabla
+
+```
+mapXplore # select <users>
+```
+
 ### Guardar
 
 Permite guardar los resultados antes buscados en el formato que se defina en la configuración.

@@ -1,6 +1,6 @@
 import csv
 from model.filecontent import FileContent
-from config.settings import SqlMapSetting, Settings
+from config.settings import SqlMapSetting, Settings, ImportSetting
 from utils.utils import Hashing
 from utils.utils import Util
 from utils.ansiprint import AnsiPrint
@@ -24,7 +24,9 @@ class FileManager:
         reader = FileReader()
         content.filename = Util.get_filename(filename)
         if os.path.exists(filename):
+            
             with open(filename, newline='') as fb:
+                
                 csv.field_size_limit(sys.maxsize)
                 csv_content = csv.DictReader(fb, delimiter=self._delimiter, quotechar='"')
                 content.headers = [column.lower() for column in csv_content.fieldnames]
@@ -35,7 +37,6 @@ class FileManager:
                     file_base64 = Util.create_filename(line.values(), content.filename)
                     
                     for value in line.values():
-                        
                         try:
                             if value is None:
                                 row.append(None)
@@ -51,8 +52,10 @@ class FileManager:
                                 file.filename = reader.save_file(file.bytearray, file.extension, file_base64)
                                 row.append(value)
                             else:
+                                decoded_value = None
                                 if value is not None:
                                     decoded_value = Util.decode(value)
+                                    decoded_value = Util.remove_invalidchars(decoded_value, ImportSetting().valid_chars)
                                 row.append(decoded_value)
                             
                         except Exception as e:

@@ -13,7 +13,9 @@ class PostgreSQL(DataBase):
     def __init__(self, dbname:str, connectionsettings:Connection):
         super().__init__(dbname=dbname, connectionsettings=connectionsettings)
         self._tables_schema = "information_schema.tables"
-        
+        self._queries = {
+            "databases":"SELECT datname FROM pg_catalog.pg_database"
+        }
 
     @property
     def principal_database(self)->str:
@@ -130,6 +132,15 @@ class PostgreSQL(DataBase):
     def test_connection(self):
         cur = self._get_cursor()
         cur.close()
+    
+    def get_databases(self) -> Result:
+        result = Result(headers=['name'])
+        databases = self._select(self._queries["databases"], showColumns=True)
+        for db in databases:
+            result.rows.append([db["datname"]])
+        
+        return result
+        
 
     def execute_query(self, query:str):
         return self._select(query, showColumns=True)

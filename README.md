@@ -76,4 +76,7 @@ python engine.py [--config config.json]
 
 ## 18.03.2024 - V1.2
 
-* Add save to JSON format
+* JSON format for storage has been added.
+* Option to retrieve databases, tables, and records from a table has been added.
+* Cleaning of printable but garbage characters upon reading has been added.
+* Errors have been addressed.

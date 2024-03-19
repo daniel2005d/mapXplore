@@ -33,6 +33,9 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
     format_parser = subparser.add_parser('format')
     format_parser.add_argument('value', choices=Settings.valid_format_files)
 
+    database_parser = subparser.add_parser('database')
+    database_parser.add_argument('value')
+
     output_parser = subparser.add_parser('output')
     output_parser.add_argument('value')
     
@@ -78,6 +81,10 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
 
     def do_tables(self, _):
         self._core.table_count_rows()
+    
+    def do_databases(self, _):
+        self._core.databases()
+
 
     def do_search(self, arg):
         """

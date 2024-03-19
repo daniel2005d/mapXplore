@@ -67,6 +67,9 @@ class DataBase:
     
     def get_tables_count(self) -> Result:
         raise ModuleNotFoundError("get_tables_count() Not implemented")
+    
+    def get_databases(self):
+        raise ModuleNotFoundError("get_databases() Not implemented")
 
     """
     Retrieve all tables and columns to try find out
@@ -86,7 +89,7 @@ class DataBase:
         return Hashing.get_md5(line)
 
     def select_table(self, table_name:str) -> Result:
-        result = Result()
+        result = Result(table_name=table_name)
         rows = self._select(f"Select * from {table_name}", showColumns=True)
         if rows:
             result.headers=list(rows[0].keys())

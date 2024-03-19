@@ -21,17 +21,22 @@ class DataManager:
         if DatabaseSetting().database_name is None:
             result = False
             AnsiPrint.print_error(locale.get("databasenull"))
+            self.databases()
         
         return result
+    
+    def _get_cursor(self):
+        db = DbConnector(database=DatabaseSetting().database_name, host=DatabaseSetting().host, 
+                            username=DatabaseSetting().username, password=DatabaseSetting().password, 
+                            dbms=DatabaseSetting().dbms)
+        
+        return db._createDBEngine()
+
 
     def _create_dbCursor(self):
         if self._validate_arguments():
-            db = DbConnector(database=DatabaseSetting().database_name, host=DatabaseSetting().host, 
-                            username=DatabaseSetting().username, password=DatabaseSetting().password, 
-                            dbms=DatabaseSetting().dbms)
-            self._cursor = db._createDBEngine()
-    
-    
+            self._cursor = self._get_cursor()
+
     def _get_values_to_find(self, word:str)->str:
         criterial = []
         words = word.split(',')
@@ -118,6 +123,11 @@ class DataManager:
         if self._cursor:
             tables = self._cursor.get_tables_count()
             AnsiPrint.printResult(tables)
+    
+    def databases(self):
+        cursor = self._get_cursor()
+        databases = cursor.get_databases()
+        AnsiPrint.printResult(databases)
 
     def run_query(self, sentence, value_to_hight_light):
         """Run the query and highlight the text that matches.
@@ -186,6 +196,7 @@ class DataManager:
         for tbl in tables.split(','):
             if self._cursor.check_exists_table(tbl):
                 table = self._cursor.select_table(tbl)
+                self._save_results(tbl, QueryType.TABLES, table)
                 AnsiPrint.printResult(table)
             else:
                 AnsiPrint.print_locale("table_not_exists",table_name=tbl)

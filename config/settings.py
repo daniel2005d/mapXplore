@@ -41,6 +41,10 @@ class Settings:
         "General":{
             "debug":False
         },
+        "Import":{
+            "strict":True,
+            "validchars":"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&\'()*+,-./:;<=>@[\\]^_`{|}"
+        },
         "Server":{
             "host":"",
             "username":"",
@@ -268,7 +272,9 @@ class SqlMapSetting(BaseSetting):
             if not name.startswith("."):
                 path_file = os.path.join(dump_dir, name)
                 if os.path.isfile(path_file):
-                    files.append({"filename":name, "path":path_file})
+                    ext_tmp = name.split('.')[-1:][0]
+                    if ext_tmp.isdigit() or ext_tmp.lower() == 'csv':
+                        files.append({"filename":name, "path":path_file})
     
         return files
     
@@ -286,3 +292,15 @@ class SqlMapSetting(BaseSetting):
             
         return directories
 
+class ImportSetting(BaseSetting):
+    __setting_key__ = "Import"
+    #  "strict":True,
+    #         "validchars":"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!\"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ \t\n\r\x0b\x0c"
+
+    @property
+    def isStrict(self)->bool:
+        return self._get_bool("strict")
+
+    @property
+    def valid_chars(self)->list[str]:
+        return list(self._get_value("validchars"))

@@ -20,7 +20,7 @@ Sus principales caracteristicas son:
 
 * Filtrar tablas y columnas por criterios.
 * Filtrar por diferentes tipos de funciones hash sin requerir su previa conversión.
-* Exportar la información relevante a Excel o HTML
+* Exportar la información relevante a Excel, HTML y JSON
 
 # Instalación
 
@@ -79,3 +79,6 @@ python engine.py [--config config.json]
 ## 18.03.2024 - V1.2
 
 * Se adiciona el formato JSON para almacenar
+* Se adiciona la opción para obtener las bases de datos, tablas y registros de una tabla.
+* Se adiciona la limpieza de caracteres que son imprimibles pero son basura al momento de leer.
+* Se ajustan errores

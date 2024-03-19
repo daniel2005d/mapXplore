@@ -41,6 +41,24 @@ mapXplore # search report
 
 <img src="../screenshot/base64_report.png">
 
+### Get Databases
+
+```
+mapXplore # databases
+```
+
+### Get Tables
+
+```
+mapXplore # tables
+```
+
+### Get all records from a table
+
+```
+mapXplore # select <users>
+```
+
 ### Save
 
 Allows saving the previously searched results in the format defined in the configuration.

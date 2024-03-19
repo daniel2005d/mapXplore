@@ -5,6 +5,7 @@ from jinja2 import Environment, FileSystemLoader
 from config.settings import ResultSetting, DatabaseSetting
 from model.result import Result, QueryResult
 from utils.utils import Hashing
+from utils.ansiprint import AnsiPrint
 
 class SaveManager:
     def __init__(self) -> None:
@@ -117,5 +118,5 @@ class SaveManager:
             wb.save(file_name)
             return file_name
         except Exception as e:
-            print(e)
+            AnsiPrint.print_debug(e)
     

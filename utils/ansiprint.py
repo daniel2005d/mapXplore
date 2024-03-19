@@ -1,5 +1,6 @@
 import sys
 import shutil
+from tabulate import tabulate
 from model.result import Result
 from utils.colors import Color
 from cmd2 import ansi, EightBitBg, RgbFg
@@ -42,29 +43,34 @@ class AnsiPrint:
         st = SimpleTable(columns)
         table = st.generate_table(data_list)
         print(table)
+        print("\n")
 
     @staticmethod
     def printResult(result:Result):
         if result is not None:
-            width = shutil.get_terminal_size().columns
-            columns: List[Column] = list()
-            data_list: List[List[Any]] = list()
-            for header in result.headers:
-                column_width = int(width/len(result.headers))
-                if column_width > 10:
-                    column_width-= 5
-
-                columns.append(Column(ansi.style(header, bold=True,italic=True, bg=EightBitBg.GRAY_53), width=column_width))
-            
-            if result.formatted_len > 0:
-                data_list = [sub for sub in result.formatted_rows]
-            else:
-                data_list = [sub for sub in result.rows]
-            
-            
-            bt = BorderedTable(columns)
-            table = bt.generate_table(data_list)
+            table = tabulate(result.rows, headers=result.headers, tablefmt="rounded_outline")
             print(table)
+            
+        # if result is not None:
+        #     width = shutil.get_terminal_size().columns
+        #     columns: List[Column] = list()
+        #     data_list: List[List[Any]] = list()
+        #     for header in result.headers:
+        #         column_width = int(width/len(result.headers))
+        #         if column_width > 10:
+        #             column_width-= 5
+
+        #         columns.append(Column(ansi.style(header, bold=True,italic=True, bg=EightBitBg.GRAY_53), width=column_width))
+            
+        #     if result.formatted_len > 0:
+        #         data_list = [sub for sub in result.formatted_rows]
+        #     else:
+        #         data_list = [sub for sub in result.rows]
+            
+            
+        #     bt = BorderedTable(columns)
+        #     table = bt.generate_table(data_list)
+        #     print(table)
     
     @staticmethod
     def print(text:str, end:str='\r\n')->None:
@@ -94,8 +100,6 @@ class AnsiPrint:
                 message = str(exception)
                 AnsiPrint.print(f"[bold][yellow][debug][reset] [yellow]{message} [reset]")
             
-
-
     @staticmethod
     def print_success(text:str)->None:
         AnsiPrint.print(f"[green][+][bold] {text}[reset]")
