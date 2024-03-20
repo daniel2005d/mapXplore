@@ -18,6 +18,23 @@ class Util:
         return True
     
     @staticmethod
+    def search_text_array(text:str,list:list[str]):
+        matches = []
+        for index, item in enumerate(list):
+            match = re.findall(text, item, flags=re.IGNORECASE)
+            if len(match)>0:
+                matches.append({"index":index, "value": item})
+        
+        return matches
+    
+    @staticmethod
+    def format_number(value:object)->str:
+        if isinstance(value, int):
+            return f'{value:,.0f}'
+        else:
+            return format(int(value))
+
+    @staticmethod
     def is_bool(value:str)->bool:
         return value.lower() in ('yes','true','false','no') if value is not None else False
 

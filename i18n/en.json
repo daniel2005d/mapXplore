@@ -39,7 +39,8 @@
         "file_not_exists":"{file} does not  exists",
         "section_config_error":"The [bold]{section}[reset] setting does not exists",
         "invalid_format":"The output format is invalid",
-        "no_value_to_search":"[red]Invalid option[reset]"
+        "no_value_to_search":"[red]Invalid option[reset]",
+        "tables_zero":"[yellow]No tables yet[reset]"
      
     }
 

@@ -123,6 +123,9 @@ class SQLite(DataBase):
         tables = self._select("Select name from sqlite_master where type='table'")
         return tables
     
+    def get_databases(self):
+        raise ModuleNotFoundError("Databases not available on sqlite")
+    
     def search_tables(self, filter:str=None):
         result = Result(headers=['tables'])
         if filter:

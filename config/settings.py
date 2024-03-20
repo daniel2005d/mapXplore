@@ -53,7 +53,8 @@ class Settings:
         },
         "Results":{
             "output":"",
-            "format":'xlsx'
+            "format":'xlsx',
+            "includeAllColumns":True
             
         },
         "sqlmap":{
@@ -73,13 +74,19 @@ class Settings:
 
     @staticmethod
     def parseBool(value:str)->bool:
-        return  value.lower() in ('yes','true','1','t')
+        if isinstance(value, bool):
+            return value
+        else:
+            return  value.lower() in ('yes','true','1','t')
     
     @staticmethod
     def set_value(section, key, value):
         if section in Settings.setting:
             if key in Settings.setting[section]:
-                Settings.setting[section][key]=value if key != 'debug' else Settings.parseBool(value)
+                if isinstance(value, bool):
+                    Settings.setting[section][key]=Settings.parseBool(value)
+                else:
+                    Settings.setting[section][key]=value
             else:
                 message = locale.get("errors.section_config_error")
                 raise MapXploreException(message=message.format(section=section))
@@ -106,12 +113,19 @@ class Settings:
     def load_settings(filename:str)->None:
         
         try:
+            filename = os.path.expanduser(filename)
             if not Util.check_file(filename):
                 raise MapXploreException(message=locale.get("errors.file_not_exists").format(file=filename))
             else:
                 with open(filename, "r") as jfile:
                     json_data = json.load(jfile)
-                    Settings.setting.update(json_data)
+                    for section in Settings.setting:
+                        for subsection in Settings.setting[section]:
+                            if section in json_data:
+                                if subsection in json_data[section]:
+                                    Settings.set_value(section, subsection, json_data[section][subsection])
+
+                    #Settings.setting.update(json_data)
         except Exception as e:
             raise MapXploreException(message=str(e))
 
@@ -140,7 +154,7 @@ class BaseSetting:
 
     def _get_bool(self, key)->bool:
         value = self._get_value(key)
-        return value if value is not None else False
+        return Settings.parseBool(value) if value is not None else False
     
     def set_value(self, section, value):
         Settings.setting[self.__setting_key__][section]=value
@@ -190,6 +204,10 @@ class ResultSetting(BaseSetting):
         else:
             raise MapXploreException(message_key="errors.invalid_format")
     
+    @property
+    def include_columns(self) -> bool:
+        return self._get_bool("includeAllColumns")
+        
     def get_folder_output(self, path_to_join=None):
         database_name = ""
         if DatabaseSetting().database_name:
@@ -202,6 +220,7 @@ class ResultSetting(BaseSetting):
             return os.path.join(main_directory, database_name, path_to_join)
         else:
             return os.path.join(main_directory, database_name)
+    
 
 class DatabaseSetting(BaseSetting):
     __setting_key__ = "Server"

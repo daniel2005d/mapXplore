@@ -19,6 +19,17 @@ class Result:
 
     def append(self, rows)->None:
         self.rows.append(rows)
+    
+    def get_column(self, index:int=None, column_name:str=None)->str:
+        if index is not None:
+            return self.headers[index]
+        elif column_name is not None:
+            return self.headers.index(column_name)
+
+    
+    def contains_header(self, name:str)->bool:
+        return name in self.headers
+
 
 class QueryType(Enum):
     NONE = 0

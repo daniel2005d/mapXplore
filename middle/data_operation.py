@@ -8,6 +8,7 @@ from lib.crypto.hashes import Hashes
 from model.result import Result, QueryResult, QueryType
 from utils.ansiprint import AnsiPrint
 from utils.colors import Color
+from utils.utils import Util
 
 
 class DataManager:
@@ -62,6 +63,41 @@ class DataManager:
     
     def _filter_columns(self, column_name)-> list[Result]:
         return self._cursor.search_columns(column_name)
+    
+    def _print_query_results(self, value_to_find:str, results:Result):
+        
+        if ResultSetting().include_columns:
+            AnsiPrint.printResult(results) # Print Results
+        else:
+            only_columns = Result()
+            all_matches = []
+            for index, row in enumerate(results.rows):
+                matches = Util.search_text_array(value_to_find, row)
+                if len(matches)>0:
+                    all_matches.append(matches)
+            for match in all_matches:
+                for col in match:
+                    col_index = int(col["index"])
+                    column_name = results.headers[col_index]
+                    if not only_columns.contains_header(column_name):
+                        only_columns.headers.append(column_name)
+                    
+                    col_index = only_columns.get_column(column_name=column_name)
+                    col["index"]=col_index
+
+            
+            for match in all_matches:
+                rows=[None]*len(only_columns.headers)
+                for col in match:
+                    column_value = col["value"]
+                    column_value,_ = Color.highlight_text(column_value, value_to_find)
+                    col_index = int(col["index"])
+                    rows[col_index] = column_value
+                
+                only_columns.formatted_rows.append(rows)
+
+            
+            AnsiPrint.printResult(only_columns)
 
     def _filter_by_value(self, value_to_find)-> None:
         queries=[]
@@ -81,10 +117,9 @@ class DataManager:
                 total+=results.length
                 results.table_name = qry.tablename
                 found = True
-                #self._results.append(results)
                 self._save_results(qry.tablename, QueryType.VALUES, results)
                 AnsiPrint.print(f"Table Name: [bold][chartreuse_1]{qry.tablename}[reset]")
-                AnsiPrint.printResult(results)
+                self._print_query_results(value_to_find, results)
 
         if found == False:
             AnsiPrint.print_info(locale.get("notfound").format(word='\r\n'.join(values)))
@@ -122,12 +157,18 @@ class DataManager:
         self._create_dbCursor()
         if self._cursor:
             tables = self._cursor.get_tables_count()
-            AnsiPrint.printResult(tables)
+            if tables:
+                AnsiPrint.printResult(tables)
+            else:
+                AnsiPrint.print_locale("errors.tables_zero")
     
     def databases(self):
-        cursor = self._get_cursor()
-        databases = cursor.get_databases()
-        AnsiPrint.printResult(databases)
+        try:
+            cursor = self._get_cursor()
+            databases = cursor.get_databases()
+            AnsiPrint.printResult(databases)
+        except Exception as e:
+            AnsiPrint.print_error(e)
 
     def columns(self, tablename:str):
         result = Result(headers=['Column Name'])

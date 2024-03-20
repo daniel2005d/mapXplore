@@ -6,7 +6,7 @@ from db import DataBase
 from model.result import Result
 from model.query import Query
 from typing import List
-from utils.utils import CastDB
+from utils.utils import CastDB, Util
 
 class PostgreSQL(DataBase):
     
@@ -174,12 +174,13 @@ class PostgreSQL(DataBase):
     def get_tables_count(self)->Result:
         result = Result(headers=['Table', "Rows"])
         tables = self.search_tables(filter=None)
-        for tbl in tables.rows:
-            table_name = tbl[0]
-            sentence = f"Select count(*) from {table_name}"
-            rows = self._select(sentence)
-            for row in rows:
-                result.rows.append([table_name, row[0]])
+        if tables:
+            for tbl in tables.rows:
+                table_name = tbl[0]
+                sentence = f"Select count(*) from {table_name}"
+                rows = self._select(sentence)
+                for row in rows:
+                    result.rows.append([table_name, Util.format_number(row[0])])
         
         return result
 

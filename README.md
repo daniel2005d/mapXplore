@@ -79,4 +79,9 @@ python engine.py [--config config.json]
 * JSON format for storage has been added.
 * Option to retrieve databases, tables, and records from a table has been added.
 * Cleaning of printable but garbage characters upon reading has been added.
-* Errors have been addressed.
+* Some errors are fixed.
+
+## 20.03.2024 - V1.3
+
+* The option *includeAllColumns* is added within the configuration.
+* Some errors are fixed.

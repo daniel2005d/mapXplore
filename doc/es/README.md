@@ -81,4 +81,9 @@ python engine.py [--config config.json]
 * Se adiciona el formato JSON para almacenar
 * Se adiciona la opción para obtener las bases de datos, tablas y registros de una tabla.
 * Se adiciona la limpieza de caracteres que son imprimibles pero son basura al momento de leer.
-* Se ajustan errores
+* Se corrigen algunos errores.
+
+## 20.03.2024 - V1.3
+
+* Se adiciona la opción *includeAllColumns* dentro de la configuración.
+* Se corrigen algunos errores.

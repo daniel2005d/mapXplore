@@ -14,8 +14,8 @@ setting = {
         },
         "Results":{
             "output":"",
-            "format":'xls|html'
-            
+            "format":'xlsx',
+            "includeAllColumns":True
         },
         "sqlmap":{
             "input":"/home/daniel/.local/share/sqlmap/hacked.com",
@@ -46,7 +46,8 @@ Esta sección tiene la configuración de la conexión de la base de datos en don
 Es usada para configurar las opciones de salida al momento de realizar las búsquedas.
 
 * **output**: Directorio de salida donde se almacenaran todos los archivos generados.
-* **format**: Formato por defecto para almacenar los resultados. Los posibles valores son *html* y *xls*
+* **format**: Formato por defecto para almacenar los resultados. Los posibles valores son *html* , *xlsx*  y *json*
+* **includeAllColumns**: Define si en los resultados de las consultas se incluyen todas las columnas de la tabla o únicamente la columna donde se encontró la información.
 
 ### sqlmap
 

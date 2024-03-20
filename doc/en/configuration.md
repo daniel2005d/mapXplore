@@ -17,8 +17,8 @@ setting = {
         },
         "Results":{
             "output":"",
-            "format":'xls|html'
-            
+            "format":'xlsx',
+            "includeAllColumns":True
         },
         "sqlmap":{
             "input":"/home/daniel/.local/share/sqlmap/hacked.com",

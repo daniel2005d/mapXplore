@@ -55,7 +55,8 @@ class FileManager:
                                 decoded_value = None
                                 if value is not None:
                                     decoded_value = Util.decode(value)
-                                    decoded_value = Util.remove_invalidchars(decoded_value, ImportSetting().valid_chars)
+                                    if ImportSetting().isStrict:
+                                        decoded_value = Util.remove_invalidchars(decoded_value, ImportSetting().valid_chars)
                                 row.append(decoded_value)
                             
                         except Exception as e:

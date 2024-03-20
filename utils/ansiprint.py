@@ -26,7 +26,7 @@ class AnsiPrint:
     @staticmethod
     def printResult(result:Result):
         if result is not None:
-            table = tabulate(result.rows, headers=result.headers, tablefmt="rounded_outline")
+            table = tabulate(result.formatted_rows if result.formatted_len > 0 else result.rows, headers=result.headers, tablefmt="rounded_grid")
             print(table)
       
     @staticmethod

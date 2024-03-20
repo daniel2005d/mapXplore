@@ -27,7 +27,7 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
         
 
     parser = Cmd2ArgumentParser(add_help="")
-    subparser = parser.add_subparsers(dest='section')
+    subparser = parser.add_subparsers(dest='section', required=True)
 
     format_parser = subparser.add_parser('format')
     format_parser.add_argument('value', choices=Settings.valid_format_files)
