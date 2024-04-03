@@ -26,8 +26,8 @@
             "saved":"The [bold]{filename}[reset] file was saved successfully",
             "loaded":"The [bold]{filename}[reset] file was loaded successfully",
             "overwrite_file":"[bold]Dou you want overwrite file?[reset] [Y/n]",
-            "table_key_title":"Key Name",
-            "table_value_title":"Current Setting"
+            "table_key_title":"[bold]Key Name[reset]",
+            "table_value_title":"[bold]Current Setting[reset]"
     },
     "help":{
         "query":"from cmd2 import Cmd2ArgumentParser, with_argparser",

@@ -10,13 +10,15 @@ class AnsiPrint:
     @staticmethod
     def printSetting(section:str):
         
-        title_message = locale.get("config.table_key_title")
-        title_value = locale.get("config.table_value_title")
+        title_message = Color.format(locale.get("config.table_key_title"))
+        title_value = Color.format(locale.get("config.table_value_title"))
         data_list= []
         option = Settings.setting[section]
         
         for key in option:
-            data_list.append([key, option[key]])
+            key_color = Color.format(f"[blue]{key}[reset]")
+            key_value = Color.format(f"[green]{option[key]}[reset]")
+            data_list.append([key_color, key_value])
 
         table_format = "mixed_outline"
         table = tabulate(data_list, headers=[title_message, title_value], tablefmt=table_format)
