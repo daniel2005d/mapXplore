@@ -13,6 +13,7 @@ This module allows you to perform searches by:
 * **search**
 * **save**: Saves the results in Excel or HTML format as specified in the [configuration](configuration.md).
 * **set**: Sets the [configuration](configuration.md) of the Results section.
+* **export**: Export the content of the database to navigable HTML file.
 
 ### Search by Tables
 ```json
@@ -70,3 +71,12 @@ mapXplore # save
 
 <img src="../screenshot/index.png">
 <img src="../screenshot/documents_html.png">
+
+### Export
+
+Export the content of the database to navigable HTML file. 
+** --limit: [optional] Set the number of rows to export, default is **10**.
+
+```
+mapXplore # export [--limit default 10]
+```

@@ -88,6 +88,14 @@ class QueryCommandSet(CommandSet, ArgumentsManager):
     
     def do_columns(self, args):
         self._core.columns(args.args)
+    
+    
+    export_parser = Cmd2ArgumentParser(add_help="")
+    export_parser.add_argument('--limit',type=int, help=locale.get('help.limit'))
+    
+    @with_argparser(export_parser)
+    def do_export(self, args):
+        self._core.export_content_seed(args.limit if args.limit else 10)
 
 
     def do_search(self, arg):

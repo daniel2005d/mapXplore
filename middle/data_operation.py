@@ -153,6 +153,17 @@ class DataManager:
         else:
             AnsiPrint.print_info(locale.get("cannot_export"))
     
+    def export_content_seed(self, limit:int=10):
+        content:list[Result] = []
+        self._create_dbCursor()
+        tables = self._cursor.search_tables(filter=None)
+        for tbl in tables.rows:
+            result = self._cursor.get_rows(tbl[0], limit=limit)
+            content.append(result)
+        
+        file = self._export_manager.save_content(content)
+        AnsiPrint.print_locale("saved_results",saved=file)
+        
     def table_count_rows(self):
         self._create_dbCursor()
         if self._cursor:
@@ -179,7 +190,7 @@ class DataManager:
         
         AnsiPrint.printResult(result)
 
-    def run_query(self, sentence, value_to_hight_light):
+    def run_query(self, sentence:str, value_to_hight_light:str):
         """Run the query and highlight the text that matches.
     
         Args:

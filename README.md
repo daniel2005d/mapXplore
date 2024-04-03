@@ -85,3 +85,7 @@ python engine.py [--config config.json]
 
 * The option *includeAllColumns* is added within the configuration.
 * Some errors are fixed.
+
+## 03.04.2024 - V1.4
+
+* Export option is added to save the content of the database into HTML file

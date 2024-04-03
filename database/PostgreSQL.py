@@ -314,3 +314,22 @@ class PostgreSQL(DataBase):
             for col in columns:
                 result.rows.append([col["table_name"], col["column_name"]])
             return result
+    
+    def get_rows(self, tablename:str, limit:int=10)->Result:
+        result = Result(table_name=tablename)
+        sentence = f"Select * from {tablename} LIMIT {limit}"
+        rows = self._select(sentence, showColumns=True)
+        for col in list(rows[0].keys()):
+            if col != Settings.checksum_column:
+                result.headers.append(col)
+        
+        for item in rows:
+            items = []
+            for key in item:
+                if key != Settings.checksum_column:
+                    items.append(item[key])
+            
+            result.rows.append(items)
+            
+        return result
+        

@@ -32,7 +32,8 @@
     "help":{
         "query":"from cmd2 import Cmd2ArgumentParser, with_argparser",
         "save_config":"Allow to store or load the configuration in a JSON file",
-        "filename":"The full path to export or import config settings"
+        "filename":"The full path to export or import config settings",
+        "limit":"Set the limit rows to export. Similar to Select * from table LIMIT [#]. Default 10"
     },
     "errors":{
         "file_exists":"The file exists",

@@ -6,6 +6,7 @@ from config.settings import ResultSetting, DatabaseSetting
 from model.result import Result, QueryResult
 from utils.utils import Hashing
 from utils.ansiprint import AnsiPrint
+from middle import __VERSION__
 
 class SaveManager:
     def __init__(self) -> None:
@@ -34,7 +35,6 @@ class SaveManager:
         output_directory = directory if directory is not None else self._output
         self._create_directory(output_directory)
         if name is None:
-            
             name = Hashing.get_md5(content)
             if format is not None:
                 name+=f".{format}"
@@ -93,7 +93,6 @@ class SaveManager:
             outfile.write(json.dumps(data, indent=4))
         
         return file_name
-                
 
     def convert_to_csv(self, items:QueryResult) -> str:
         try:
@@ -120,3 +119,11 @@ class SaveManager:
         except Exception as e:
             AnsiPrint.print_debug(e)
     
+    def save_content(self, items:list[Result]) -> str:
+        explorer_folder = ResultSetting().get_folder_output('html')
+        env = Environment(loader=FileSystemLoader("."))
+        template = env.get_template('/templates/explorer.html')
+        output = template.render(options=items, version=__VERSION__)
+        file = self.save(output, 'html', directory=explorer_folder, name='explorer')
+        return file
+        

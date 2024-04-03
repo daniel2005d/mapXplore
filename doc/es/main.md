@@ -14,7 +14,7 @@ Este modulo permite realizar las búsquedas por:
 * **search**
 * **save**: Guarda los resultados en excel o HTML según el formato especificado en la  [configuración](configuration.md)
 * **set**: Establece la [configuración](configuration.md) de la section de Results.
-
+* **export**: Exporta el contenido de la base de datos en un archivo HTML navegable.
 ### Buscar por tablas
 ```
 mapXplore #> search tables users
@@ -71,3 +71,12 @@ mapXplore # save
 
 <img src="../screenshot/index.png">
 <img src="../screenshot/documents_html.png">
+
+### Export
+
+Exporta el contenido de la base de datos en un archivo HTML navegable.
+** --limit: [opcional] Establece el número de filas a exportar. Por defecto es **10**.
+
+```
+mapXplore # export [--limit default 10]
+```

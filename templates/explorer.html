@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mapXplore Content</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    .footer{
+      background-color:#111927;
+      color:white;
+      padding:10px;
+      text-align: center;
+      position:fixed;
+      bottom: 0;
+      right:0;
+      max-width:80%;
+      margin-right:20px;
+      width: auto;
+    }
+    .sidebar {
+      height: 100vh;
+      background-color: #111927!important;
+      color: white !important;
+      overflow-y:auto;
+    }
+    
+    .nav-link{
+      color:white!important;
+    }
+    .nav-link:hover{
+      color:#9fef00!important;
+    }
+    .nav-link.active{
+      background-color: #6c757d !important;
+    }
+    body{
+      background-color:#111927 !important;
+      color: white !important;
+    }
+    .table-dark{
+      background-color:#111927 !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container-fluid">
+    <div class="row">
+      <!-- Menú lateral -->
+      <div class="col-md-2 sidebar bg-light">
+        <h2>Menú</h2>
+        <ul class="nav flex-column">
+          {%for opt in options%}
+            <li class="nav-item">
+              <a class="nav-link {%if loop.first %}active{%endif%} " data-toggle="pill" href="#opcion{{loop.index}}">
+                {{opt.table_name}}
+              </a>
+            </li>
+          {%endfor%}
+          
+          
+        </ul>
+      </div>
+      <!-- Contenido -->
+      <div class="col-md-10">
+        <div class="tab-content">
+          {%for opt in options%}
+            <div class="tab-pane fade {%if loop.first %}show active{%endif%}" id="opcion{{loop.index}}">
+              <h2>
+                {{opt.table_name}}
+              </h2>
+              <p>
+                <table class="table table-dark table-striped">
+                  <thead>
+                    <tr>
+                      {%for header in opt.headers%}
+                    <th>
+                      {{header}}
+                    </th>
+                    {%endfor%}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {%for row in opt.rows%}
+<tr>
+  {%for r in row%}
+  <td>
+    {%if r.startswith('/9j/')%}
+    <img src="data:image/png;base64, {{r}}" width=50% >
+    {%else%}
+      {{r}}
+    {%endif%}
+  </td>
+  {%endfor%}
+</tr>
+{%endfor%}
+                  </tbody>
+                </table>
+
+              </p>
+            </div>
+          
+          {%endfor%}
+          
+        </div>
+      </div>
+    </div>
+  </div>
+  <hr>
+<div class="footer">
+  <a href="https://github.com/daniel2005d/mapXplore">mapXplore</a>  | {{version}} | Daniel Vargas
+</div>
+  <!-- jQuery y Bootstrap JS (Requerido para usar el componente de pestañas) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

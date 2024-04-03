@@ -70,6 +70,9 @@ class DataBase:
     
     def get_databases(self):
         raise ModuleNotFoundError("get_databases() Not implemented")
+    
+    def get_rows(self, tablename:str, limit:int=10)->Result:
+        raise ModuleNotFoundError(f"get_rows({tablename}, {limit}) Not implemented")
 
     """
     Retrieve all tables and columns to try find out
