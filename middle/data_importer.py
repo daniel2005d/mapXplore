@@ -72,18 +72,18 @@ class DataImporter():
         index_ext = file.index('.')
         file_name = file[:index_ext].lower()
         ### Get Dat file structure and information
-        AnsiPrint.print_locale("import.reading_file", end=' '*10, filename=file_name)
+        AnsiPrint.print_locale("import.reading_file", end='\r', filename=file_name)
         file_content = csv.get_structure(path)
         ## Create Table and Columns
         table_columns = file_content.headers
         if file_name not in self._summary["tables"]:
             self._summary["tables"].append(file_name)
         ## Create tables
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)}]", end=' '*10)
+        AnsiPrint.print(f"\rSaving... [cyan]{file_name}[reset] [{len(file_content.rows)}/{len(file_content.rows)}]"+' '*40, end='\r')
         db.create_table(file_name, table_columns)
         db.insert_many(file_name,file_content.rows, table_columns)
         self._summary["rows"]+=len(file_content.rows)
-        AnsiPrint.print(f"\rBinding [cyan]{file_name}[green] [Success][reset]", end=' '*10)
+        AnsiPrint.print(f"Imported [cyan]{file_name}[green] [Success][reset]"+' '*40)
 
     def start(self):
         old_db = SqlMapSetting().database

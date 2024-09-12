@@ -20,9 +20,6 @@ def show_banner():
     Repository: [bold]https://github.com/daniel2005d/mapXplore[reset]
 """
 
-
-
-    
     AnsiPrint.print(banner)
 
 parser = argparse.ArgumentParser()
